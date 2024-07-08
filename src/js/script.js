@@ -1,4 +1,3 @@
-import { Tagger } from "./tagger.js";
 import { TagFS } from "./tagfs.js";
 
 function updateViewport() {
@@ -25,11 +24,9 @@ const files = {
     'kitten2.jpg': ['100x200', ['meme', 'kitten']],
     'meme.webp': ['1980x1366', ['meme', 'funny', 'quote']],
 }
-
-const tagger = new Tagger(['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote']);
-tagger.feedFile = path => files[path][1];
-
-const tagfs = new TagFS(tagger);
+const tagfs = new TagFS();
+tagfs.tags = ['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote']
+tagfs.tagFile = path => files[path][1];
 tagfs.createElement = (path, tags) => {
     let image = new Image();
     image.src = "https://via.placeholder.com/" + files[path][0];
@@ -42,7 +39,7 @@ Object.keys(files).forEach(fpath => {
     viewport.appendChild(file.element);
 });
 
-tagger.tags.forEach(tag => {
+tagfs.tags.forEach(tag => {
     let checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.name = tag;

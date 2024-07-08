@@ -1,8 +1,6 @@
 import { JsonTagFS } from "../jfs.js";
 
 function updateViewport() {
-    const zip = (a, b) => a.map((k, i) => [k, b[i]]);
-
     let checkboxes = taglist.getElementsByTagName("input");
     checkboxes = Array.from(checkboxes);
 
@@ -23,19 +21,19 @@ function updateViewport() {
         }
     });
 
-    zip(Object.keys(tag_counts), Object.values(tag_counts)).forEach(([tag, count]) => {
+    for (let [tag, count] of Object.entries(tag_counts)) {
         let label = document.getElementById('label_' + tag);
 
         if (count === 0) {
             label.parentElement.style.display = 'none';
-            return;
+            continue;
         } else {
             label.parentElement.style.display = 'block';
         }
 
         let i = label.innerText.search(/\(\d+\)$/);
         label.innerText = label.innerText.substring(0, i) + ' (' + count + ')';
-    });
+    }
 }
 
 function addTag(tag) {
@@ -83,3 +81,5 @@ document.getElementById("clear").addEventListener("click", () => {
 
     updateViewport();
 });
+
+document.body.onload = updateViewport;

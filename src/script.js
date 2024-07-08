@@ -1,4 +1,5 @@
 import { Tagger } from "./tagger.js";
+import { TagFS } from "./tagfs.js";
 
 const navbar = document.getElementById('navbar');
 const taglist = document.getElementById('taglist');
@@ -14,11 +15,15 @@ const files = {
 const tagger = new Tagger(['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote']);
 tagger.feedFile = path => files[path][1];
 
-Object.keys(files).forEach(fname => {
+const tagfs = new TagFS(tagger);
+tagfs.createElement = (path, tags) => {
     let image = new Image();
-    image.src = "https://via.placeholder.com/" + files[fname][0];
-    viewport.appendChild(image);
-});
+    image.src = "https://via.placeholder.com/" + files[path][0];
+
+    return image;
+};
+Object.keys(files).forEach(file => tagfs.upload(file));
+tagfs.files.forEach(f => viewport.appendChild(f.element));
 
 tagger.tags.forEach(tag => {
     let checkbox = document.createElement('input');

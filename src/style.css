@@ -1,3 +1,7 @@
+* {
+    font-family: "Arial";
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -5,13 +9,24 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: row;
-    font-family: "Arial";
+}
+
+button {
+    appearance: none;
+    background: linear-gradient(180deg, #2371e8, #145ecd);
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    border-image-slice: 1;
+    padding: 4px 8px;
+    margin: 4px;
+    color: white;
 }
 
 #navbar {
     background: #e2e2e2;
     position: fixed;
-    width: 15%;
+    width: 10%;
     height: 100vh;
     padding: 10px;
     box-sizing: border-box;
@@ -28,7 +43,7 @@ body {
 
 #viewport {
     width: 100%;
-    padding-left: 15%;
+    padding-left: 10%;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -40,4 +55,20 @@ body {
 #viewport img {
     max-width: 400px;
     margin: 5px;
+    border-radius: 5px;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1c1c1c;
+    }
+
+    #navbar {
+        color: white;
+        background-color: #232323d9;
+    }
+
+    #navbar img {
+        border: 2px solid hsl(0 0% 13%);
+    }
 }

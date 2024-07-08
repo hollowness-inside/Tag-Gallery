@@ -2,6 +2,26 @@ const navbar = document.getElementById('navbar');
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
 
+const TAGS = ['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote'];
+
+TAGS.forEach(tag => {
+    let checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = tag;
+    checkbox.id = 'cb_' + tag;
+
+    let label = document.createElement('label');
+    label.setAttribute('for', checkbox.id);
+    label.setAttribute('id', 'label_' + tag);
+    label.innerText = tag;
+
+    let listItem = document.createElement('li');
+    listItem.appendChild(checkbox);
+    listItem.appendChild(label);
+    
+    taglist.appendChild(listItem);
+});
+
 document.getElementById('clear').addEventListener('click', () => {
     let tags = taglist.getElementsByTagName('input');
 

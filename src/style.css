@@ -30,3 +30,8 @@ body {
     width: 100%;
     padding-left: 15%;
 }
+
+#viewport img {
+    max-width: 400px;
+    margin: 5px;
+}

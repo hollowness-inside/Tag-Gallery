@@ -15,6 +15,25 @@ function updateViewport() {
     });
 }
 
+function addTag(tag) {
+    let checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = tag;
+    checkbox.id = 'cb_' + tag;
+    checkbox.addEventListener('change', updateViewport);
+
+    let label = document.createElement('label');
+    label.setAttribute('for', checkbox.id);
+    label.setAttribute('id', 'label_' + tag);
+    label.innerText = tag;
+
+    let listItem = document.createElement('li');
+    listItem.appendChild(checkbox);
+    listItem.appendChild(label);
+
+    taglist.appendChild(listItem);
+}
+
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
 let tagfs;
@@ -23,40 +42,21 @@ fetch('tags.json')
     .then(response => response.json())
     .then(data => {
         tagfs = new JsonTagFS(data);
+        tagfs.files.forEach(file =>
+            viewport.appendChild(file.element)
+        );
 
-        tagfs.files.forEach(file => {
-            console.log(file);
-            viewport.appendChild(file.element);
-        });
-
-        tagfs.tags.forEach(tag => {
-            let checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = tag;
-            checkbox.id = 'cb_' + tag;
-            checkbox.addEventListener('change', updateViewport);
-
-            let label = document.createElement('label');
-            label.setAttribute('for', checkbox.id);
-            label.setAttribute('id', 'label_' + tag);
-            label.innerText = tag;
-
-            let listItem = document.createElement('li');
-            listItem.appendChild(checkbox);
-            listItem.appendChild(label);
-
-            taglist.appendChild(listItem);
-        });
-
-        document.getElementById('clear').addEventListener('click', () => {
-            let tags = taglist.getElementsByTagName('input');
-
-            for (let element of tags)
-                element.checked = false;
-
-            updateViewport();
-        });
+        tagfs.tags.forEach(addTag);
     })
     .catch(error => {
         console.error('Error fetching the JSON file:', error);
     });
+
+document.getElementById('clear').addEventListener('click', () => {
+    let tags = taglist.getElementsByTagName('input');
+
+    for (let element of tags)
+        element.checked = false;
+
+    updateViewport();
+});

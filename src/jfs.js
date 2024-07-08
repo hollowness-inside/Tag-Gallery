@@ -2,7 +2,6 @@ import { TagFS } from "./js/tagfs.js";
 import { Item } from "./js/item.js";
 
 export class JsonTagFS extends TagFS {
-    #jsonData;
     #files;
     #tags;
 

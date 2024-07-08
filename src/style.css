@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+#navbar {
+    background: red;
+    position: fixed;
+    width: 15%;
+    height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+#navbar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#viewport {
+    width: 100%;
+    padding-left: 15%;
+}

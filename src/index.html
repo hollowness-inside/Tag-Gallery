@@ -4,11 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My JS Project</title>
+    <title>Tag Gallery</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <h1>Hello, World!</h1>
+    <div id="navbar">
+        <button id="clear">Clear all filters</button>
+        <ul id="taglist">
+            <li>
+                <input type="checkbox" name="tag1" id="cb_tag1">
+                <label for="cb_tag1">Tag 1</label>
+            </li>
+        </ul>
+    </div>
+    <div id="viewport">
+        <img src="https://via.placeholder.com/200x300" alt="Image">
+    </div>
+
     <script src="script.js"></script>
 </body>
 

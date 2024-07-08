@@ -4,7 +4,21 @@ const navbar = document.getElementById('navbar');
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
 
+const files = {
+    'kitten.png': ['200x300', ['funny', 'meme', 'kitten', 'baby']],
+    'puppy': ['600x600', ['sad', 'puppy', 'quote']],
+    'kitten2.jpg': ['100x200', ['meme', 'kitten']],
+    'meme.webp': ['1980x1366', ['meme', 'funny', 'quote']],
+}
+
 const tagger = new Tagger(['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote']);
+tagger.feedFile = path => files[path][1];
+
+Object.keys(files).forEach(fname => {
+    let image = new Image();
+    image.src = "https://via.placeholder.com/" + files[fname][0];
+    viewport.appendChild(image);
+});
 
 tagger.tags.forEach(tag => {
     let checkbox = document.createElement('input');

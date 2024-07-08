@@ -6,7 +6,7 @@ export class TagFS {
         this.tags = [];
     }
 
-    createElement() {
+    createElement(path, tags) {
         throw new Error("Not implemented");
     }
 

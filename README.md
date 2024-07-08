@@ -4,7 +4,7 @@ Organizes a collection of image and video files in one place and allows filterin
 # MVP (Minimum Viable Product)
 - [x] Navigation checkboxes to select types of images to display.
 - [x] Viewport capable of displaying a grid of images.
-- [ ] Clicking on an image/video opens it in another tab.
+- [x] Clicking on an image/video opens it in another tab.
 
 # Future Improvements
 - [ ] Display the number of images within each category next to the checkboxes.

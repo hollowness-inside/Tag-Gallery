@@ -33,6 +33,7 @@ const tagfs = new TagFS(tagger);
 tagfs.createElement = (path, tags) => {
     let image = new Image();
     image.src = "https://via.placeholder.com/" + files[path][0];
+    image.addEventListener('click', () => window.open(image.src));
     return image;
 };
 

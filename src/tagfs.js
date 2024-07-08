@@ -12,9 +12,9 @@ export class TagFS {
 
         let file = new Item(path, tags, element);
         this.files.push(file);
-    }
 
-    createElement() {}
+        return file;
+    }
 
     filter(filters) {
         if (filters == []) return this.files;

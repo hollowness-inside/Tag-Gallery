@@ -1,7 +1,21 @@
 import { Tagger } from "./tagger.js";
 import { TagFS } from "./tagfs.js";
 
-const navbar = document.getElementById('navbar');
+function updateViewport() {
+    let checkboxes = taglist.getElementsByTagName('input');
+    checkboxes = Array.from(checkboxes);
+
+    const activeFilters = checkboxes.filter(ch => ch.checked).map(ch => ch.name);
+    let filteredFiles = tagfs.filter(activeFilters);
+
+    tagfs.files.forEach(file => {
+        if (filteredFiles.includes(file))
+            file.element.style.display = "block";
+        else
+            file.element.style.display = "none";
+    });
+}
+
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
 
@@ -19,17 +33,20 @@ const tagfs = new TagFS(tagger);
 tagfs.createElement = (path, tags) => {
     let image = new Image();
     image.src = "https://via.placeholder.com/" + files[path][0];
-
     return image;
 };
-Object.keys(files).forEach(file => tagfs.upload(file));
-tagfs.files.forEach(f => viewport.appendChild(f.element));
+
+Object.keys(files).forEach(fpath => {
+    let file = tagfs.upload(fpath);
+    viewport.appendChild(file.element);
+});
 
 tagger.tags.forEach(tag => {
     let checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.name = tag;
     checkbox.id = 'cb_' + tag;
+    checkbox.addEventListener('change', updateViewport);
 
     let label = document.createElement('label');
     label.setAttribute('for', checkbox.id);
@@ -48,4 +65,6 @@ document.getElementById('clear').addEventListener('click', () => {
 
     for (let element of tags)
         element.checked = false;
+
+    updateViewport();
 });

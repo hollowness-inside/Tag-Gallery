@@ -82,4 +82,4 @@ document.getElementById("clear").addEventListener("click", () => {
     updateViewport();
 });
 
-document.body.onload = updateViewport;
+document.body.onload = () => updateViewport();

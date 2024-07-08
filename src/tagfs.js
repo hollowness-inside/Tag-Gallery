@@ -6,6 +6,10 @@ export class TagFS {
         this.tagger = tagger;
     }
 
+    createElement() {
+        throw new Error("Not implemented");
+    }
+
     upload(path) {
         let tags = this.tagger.feedFile(path);
         let element = this.createElement(path, tags);

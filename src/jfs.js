@@ -12,7 +12,7 @@ export class JsonTagFS extends TagFS {
         this.#tags = [];
 
         for (let item of data) {
-            let tags = item['tags'];
+            let tags = item["tags"];
             this.addTags(tags);
             this.addItem(item);
         }
@@ -29,9 +29,9 @@ export class JsonTagFS extends TagFS {
 
     addItem(it) {
         let element = new Image();
-        element.src = it['src'];
+        element.src = "images/" + it["path"];
 
-        let item = new Item(it['path'], it['tags'], element);
+        let item = new Item(it["path"], it["tags"], element);
         this.#files.push(item);
         return it;
     }

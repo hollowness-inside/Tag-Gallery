@@ -7,7 +7,7 @@ Organizes a collection of image and video files in one place and allows filterin
 - [x] Clicking on an image/video opens it in another tab.
 
 # Future Improvements
-- [ ] Display the number of images within each category next to the checkboxes.
-- [ ] Hide checkboxes if the number of images in the category is 0.
+- [x] Display the number of images within each category next to the checkboxes.
+- [x] Hide checkboxes if the number of images in the category is 0.
 - [ ] Allow changing file tags within the program.
 - [ ] Add a histogram of labels.

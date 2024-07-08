@@ -1,27 +1,12 @@
 import { Item } from "./item.js";
 
 export class TagFS {
-    constructor() {
-        this.files = [];
-        this.tags = [];
-    }
-
-    createElement(path, tags) {
+    get files() {
         throw new Error("Not implemented");
     }
 
-    tagFile(path) {
+    get tags() {
         throw new Error("Not implemented");
-    }
-
-    upload(path) {
-        let tags = this.tagFile(path);
-        let element = this.createElement(path, tags);
-
-        let file = new Item(path, tags, element);
-        this.files.push(file);
-
-        return file;
     }
 
     filter(filters) {

@@ -3,42 +3,43 @@ import { Item } from "./js/item.js";
 
 export class JsonTagFS extends TagFS {
     #jsonData;
+    #files;
+    #tags;
 
-    constructor(path) {
+    constructor(data) {
         super();
 
-        fetch(path)
-            .then(response => response.json())
-            .then(data => {
-                this.#jsonData = data;
+        this.#files = [];
+        this.#tags = [];
 
-                for (let item of data)
-                    this.insert(item['path'], item['tags'], item['src']);
-            })
-            .catch(error => {
-                console.error('Error fetching the JSON file:', error);
-            });
+        for (let item of data) {
+            let tags = item['tags'];
+            this.addTags(tags);
+            this.addItem(item);
+        }
+
     }
 
-    insert(path, tags, src) {
-        let element = this.createElement(path, tags, src);
-
-        let file = new Item(path, tags, element);
-        this.files.push(file);
-
-        return file;
+    get files() {
+        return this.#files;
     }
 
-    tagFile(path) {
-        let split = path.split("/");
-        let name = split[split.length - 1];
-        return this.#jsonData[name]["tags"];
+    get tags() {
+        return this.#tags;
     }
 
-    createElement(path, tags, src) {
+    addItem(it) {
         let element = new Image();
-        element.src = src;
+        element.src = it['src'];
 
-        return element;
+        let item = new Item(it['path'], it['tags'], element);
+        this.#files.push(item);
+        return it;
+    }
+
+    addTags(tags) {
+        for (let tag of tags)
+            if (!this.#tags.includes(tag))
+                this.#tags.push(tag);
     }
 }

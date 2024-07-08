@@ -17,36 +17,46 @@ function updateViewport() {
 
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
+let tagfs;
 
-let tagfs = new JsonTagFS('tags.json');
-tagfs.files.forEach(file => {
-    viewport.appendChild(file);
-});
+fetch('tags.json')
+    .then(response => response.json())
+    .then(data => {
+        tagfs = new JsonTagFS(data);
 
-tagfs.tags.forEach(tag => {
-    let checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.name = tag;
-    checkbox.id = 'cb_' + tag;
-    checkbox.addEventListener('change', updateViewport);
+        tagfs.files.forEach(file => {
+            console.log(file);
+            viewport.appendChild(file.element);
+        });
 
-    let label = document.createElement('label');
-    label.setAttribute('for', checkbox.id);
-    label.setAttribute('id', 'label_' + tag);
-    label.innerText = tag;
+        tagfs.tags.forEach(tag => {
+            let checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = tag;
+            checkbox.id = 'cb_' + tag;
+            checkbox.addEventListener('change', updateViewport);
 
-    let listItem = document.createElement('li');
-    listItem.appendChild(checkbox);
-    listItem.appendChild(label);
+            let label = document.createElement('label');
+            label.setAttribute('for', checkbox.id);
+            label.setAttribute('id', 'label_' + tag);
+            label.innerText = tag;
 
-    taglist.appendChild(listItem);
-});
+            let listItem = document.createElement('li');
+            listItem.appendChild(checkbox);
+            listItem.appendChild(label);
 
-document.getElementById('clear').addEventListener('click', () => {
-    let tags = taglist.getElementsByTagName('input');
+            taglist.appendChild(listItem);
+        });
 
-    for (let element of tags)
-        element.checked = false;
+        document.getElementById('clear').addEventListener('click', () => {
+            let tags = taglist.getElementsByTagName('input');
 
-    updateViewport();
-});
+            for (let element of tags)
+                element.checked = false;
+
+            updateViewport();
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching the JSON file:', error);
+    });

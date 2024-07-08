@@ -1,0 +1,38 @@
+[
+    {
+        "path": "kitten.png",
+        "src": "https://via.placeholder.com/200x300",
+        "tags": [
+            "funny",
+            "meme",
+            "kitten",
+            "baby"
+        ]
+    },
+    {
+        "path": "puppy",
+        "src": "https://via.placeholder.com/600x600",
+        "tags": [
+            "sad",
+            "puppy",
+            "quote"
+        ]
+    },
+    {
+        "path": "kitten2.jpg",
+        "src": "https://via.placeholder.com/100x200",
+        "tags": [
+            "meme",
+            "kitten"
+        ]
+    },
+    {
+        "path": "meme.webp",
+        "src": "https://via.placeholder.com/1980x1366",
+        "tags": [
+            "meme",
+            "funny",
+            "quote"
+        ]
+    }
+]

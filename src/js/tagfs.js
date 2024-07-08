@@ -6,7 +6,7 @@ export class TagFS {
         this.tags = [];
     }
 
-    createElement() {
+    createElement(path, tags, src) {
         throw new Error("Not implemented");
     }
 
@@ -14,18 +14,29 @@ export class TagFS {
         throw new Error("Not implemented");
     }
 
-    upload(path) {
-        let tags = this.tagFile(path);
-        let element = this.createElement(path, tags);
+    insert(path, tags, src) {
+        this.#addTags(tags);
 
+        let element = this.createElement(path, tags, src);
         let file = new Item(path, tags, element);
         this.files.push(file);
 
         return file;
     }
 
+    upload(path) {
+        let tags = this.tagFile(path);
+        return this.insert(path, tags);
+    }
+
     filter(filters) {
         if (filters == []) return this.files;
         return this.files.filter(file => filters.every(tag => file.tags.includes(tag)));
+    }
+
+    #addTags(tags) {
+        for (let tag of tags)
+            if (!this.tags.includes(tag))
+                this.tags.push(tag);
     }
 }

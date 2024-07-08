@@ -1,4 +1,4 @@
-import { TagFS } from "./tagfs.js";
+import { JsonTagFS } from "../jfs.js";
 
 function updateViewport() {
     let checkboxes = taglist.getElementsByTagName('input');
@@ -18,25 +18,9 @@ function updateViewport() {
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
 
-const files = {
-    'kitten.png': ['200x300', ['funny', 'meme', 'kitten', 'baby']],
-    'puppy': ['600x600', ['sad', 'puppy', 'quote']],
-    'kitten2.jpg': ['100x200', ['meme', 'kitten']],
-    'meme.webp': ['1980x1366', ['meme', 'funny', 'quote']],
-}
-const tagfs = new TagFS();
-tagfs.tags = ['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote']
-tagfs.tagFile = path => files[path][1];
-tagfs.createElement = (path, tags) => {
-    let image = new Image();
-    image.src = "https://via.placeholder.com/" + files[path][0];
-    image.addEventListener('click', () => window.open(image.src));
-    return image;
-};
-
-Object.keys(files).forEach(fpath => {
-    let file = tagfs.upload(fpath);
-    viewport.appendChild(file.element);
+let tagfs = new JsonTagFS('tags.json');
+tagfs.files.forEach(file => {
+    viewport.appendChild(file);
 });
 
 tagfs.tags.forEach(tag => {

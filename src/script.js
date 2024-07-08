@@ -1,10 +1,12 @@
+import { Tagger } from "./tagger.js";
+
 const navbar = document.getElementById('navbar');
 const taglist = document.getElementById('taglist');
 const viewport = document.getElementById('viewport');
 
-const TAGS = ['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote'];
+const tagger = new Tagger(['funny', 'sad', 'meme', 'kitten', 'puppy', 'baby', 'quote']);
 
-TAGS.forEach(tag => {
+tagger.tags.forEach(tag => {
     let checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.name = tag;
@@ -18,7 +20,7 @@ TAGS.forEach(tag => {
     let listItem = document.createElement('li');
     listItem.appendChild(checkbox);
     listItem.appendChild(label);
-    
+
     taglist.appendChild(listItem);
 });
 

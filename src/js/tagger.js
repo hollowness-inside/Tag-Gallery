@@ -4,6 +4,6 @@ export class Tagger {
     }
 
     feedFile(path) {
-        return []
+        throw new Error("Not implemented");
     }
 }

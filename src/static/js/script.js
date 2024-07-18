@@ -59,7 +59,7 @@ const taglist = document.getElementById("taglist");
 const viewport = document.getElementById("viewport");
 
 let tagfs;
-fetch("tags.json")
+fetch("localhost:8080/fetch")
     .then(response => response.json())
     .then(data => {
         tagfs = new JsonTagFS(data);

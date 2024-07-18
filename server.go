@@ -7,11 +7,11 @@ import (
 )
 
 type Item struct {
-	Path string
-	Tags []string
+	Path string   `json:"path"`
+	Tags []string `json:"tags"`
 }
 
-func fetchImages(w http.ResponseWriter, r *http.Request) {
+func fetchItems(w http.ResponseWriter, r *http.Request) {
 	println("Works")
 	if r.Method != "GET" {
 		return
@@ -37,10 +37,10 @@ func fetchImages(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fs := http.FileServer(http.Dir("./static"))
+	fs := http.FileServer(http.Dir("./src"))
 	http.Handle("/", fs)
 
-	http.HandleFunc("/fetch", fetchImages)
+	http.HandleFunc("/fetch", fetchItems)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {

@@ -57,8 +57,8 @@ function addTag(tag) {
 
 const taglist = document.getElementById("taglist");
 const viewport = document.getElementById("viewport");
-let tagfs;
 
+let tagfs;
 fetch("tags.json")
     .then(response => response.json())
     .then(data => {

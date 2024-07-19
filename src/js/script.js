@@ -29,7 +29,15 @@ class UIManager {
      */
     #clearBtn;
 
+    /**
+     * Array of tags in the tag list.
+     * @type {string[]}
+     */
+    #tags;
+
     constructor() {
+        this.#tags = [];
+
         this.#viewport = document.getElementById("viewport");
         this.#taglist = document.getElementById("taglist");
         this.#clearBtn = document.getElementById("clear");
@@ -49,7 +57,7 @@ class UIManager {
      * Creates a new element for the tag and inserts it into the list.
      * @param {string} tag tag to be added
      */
-    addTag(tag) {
+    #addTag(tag) {
         let checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.name = tag;
@@ -66,6 +74,19 @@ class UIManager {
         listItem.appendChild(label);
 
         this.#taglist.appendChild(listItem);
+    }
+
+    /**
+     * Adds a tag to the tag list. If the tag is already present,
+     * nothing happens.
+     * @param {string} tag tag to be added
+     */
+    addTag(tag) {
+        if (this.#tags.includes(tag))
+            return;
+
+        this.#tags.push(tag);
+        this.#addTag(tag);
     }
 
     /**

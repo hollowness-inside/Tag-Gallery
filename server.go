@@ -18,8 +18,9 @@ import (
 var db *sql.DB
 
 type Item struct {
-	Path     string   `json:"path"`
-	Name     string   `json:"name"`
+	Id       int64    `json:"id"`
+	Ext      string   `json:"extension"`
+	Dir      string   `json:"directory"`
 	Mimetype string   `json:"type"`
 	Tags     []string `json:"tags"`
 }
@@ -31,9 +32,9 @@ func initDB(path string) (*sql.DB, error) {
 	}
 
 	if _, err = conn.Exec(`CREATE TABLE IF NOT EXISTS vault (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-                path TEXT NOT NULL,
-                name STR(128) NOT NULL,
+				id INTEGER UNIQUE PRIMARY KEY AUTOINCREMENT,
+				extension STR(10),
+                directory TEXT NOT NULL,
                 type TEXT,
                 tags TEXT);`); err != nil {
 		return nil, err
@@ -42,25 +43,18 @@ func initDB(path string) (*sql.DB, error) {
 	return conn, nil
 }
 
-func getNextId() int {
-	var lastid int
-	err := db.QueryRow("SELECT seq FROM sqlite_sequence WHERE name=\"vault\"").Scan(&lastid)
-	if err == sql.ErrNoRows {
-		return 1
-	}
-
+func addItem(ext, dir, typ string, jtags string) int64 {
+	result, err := db.Exec("INSERT INTO vault (extension, directory, type, tags) VALUES (?, ?, ?, ?)", ext, dir, typ, jtags)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return lastid + 1
-}
-
-func addItem(path, name, typ string, jtags string) {
-	_, err := db.Exec("INSERT INTO vault (path, name, type, tags) VALUES (?, ?, ?, ?)", path, name, typ, jtags)
+	rowid, err := result.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	return rowid
 }
 
 func fetchItems(w http.ResponseWriter, r *http.Request) {
@@ -75,19 +69,20 @@ func fetchItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	items := make([]Item, 0, count)
-	rows, err := db.Query("SELECT path, name, type, tags FROM vault")
+	rows, err := db.Query("SELECT id, extension, directory, type, tags FROM vault")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for rows.Next() {
-		var path, name, mtype, jtags string
-		rows.Scan(&path, &name, &mtype, &jtags)
+		var id int64
+		var ext, dir, mtype, jtags string
+		rows.Scan(&id, &ext, &dir, &mtype, &jtags)
 
 		var tags []string
 		json.Unmarshal([]byte(jtags), &tags)
 
-		item := Item{path, name, mtype, tags}
+		item := Item{id, ext, dir, mtype, tags}
 		items = append(items, item)
 	}
 
@@ -122,14 +117,16 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	mimeRoot := strings.Split(mime, "/")[0]
 	reader.Seek(0, 0)
 
-	fname := strconv.Itoa(getNextId())
-	fext := path.Ext(file.Filename)
-	fname = fname + fext
-
 	dirPath := path.Join("./src/vault/", mimeRoot)
 	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
+
+	fext := path.Ext(file.Filename)
+
+	nextid := addItem(fext, mimeRoot, mime, tags)
+	fname := strconv.FormatInt(nextid, 10)
+	fname = fname + fext
 
 	fpath := path.Join(dirPath, fname)
 	fout, err := os.Create(fpath)
@@ -139,7 +136,6 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	defer fout.Close()
 
 	fout.ReadFrom(reader)
-	addItem(path.Join(mimeRoot, fname), fname, mime, tags)
 }
 
 func main() {

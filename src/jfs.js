@@ -29,7 +29,7 @@ export class JsonTagFS extends TagFS {
 
     addItem(it) {
         let element = new Image();
-        element.src = "/vault/" + it["path"];
+        element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
 
         let item = new Item(it["path"], it["tags"], element);
         this.#files.push(item);

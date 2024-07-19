@@ -167,8 +167,6 @@ class ServerCommunication {
                     ui.addImage(file.element)
                 );
 
-                console.log(tagfs);
-
                 tagfs.tags.forEach(tag => ui.addTag(tag));
             })
             .catch(error => {

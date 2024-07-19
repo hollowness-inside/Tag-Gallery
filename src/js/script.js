@@ -1,207 +1,260 @@
 import { JsonTagFS } from "../jfs.js";
 
-function updateViewport() {
-    let checkboxes = taglist.getElementsByTagName("input");
-    checkboxes = Array.from(checkboxes);
+class UIManager {
+    #viewport;
 
-    const activeFilters = checkboxes.filter(ch => ch.checked).map(ch => ch.name);
-    let filteredFiles = tagfs.filter(activeFilters);
+    #taglist;
+    #clearBtn;
 
-    let tag_counts = {};
-    tagfs.tags.forEach(tag => tag_counts[tag] = 0);
+    constructor() {
+        this.#viewport = document.getElementById("viewport");
+        this.#taglist = document.getElementById('taglist');
+        this.#clearBtn = document.getElementById('clear');
 
-    tagfs.files.forEach(file => {
-        if (filteredFiles.includes(file)) {
-            file.element.style.display = "block";
-            file.tags.forEach(tag => {
-                tag_counts[tag] += 1;
-            });
-        } else {
-            file.element.style.display = "none";
-        }
-    });
+        this.#clearBtn.addEventListener("click", () => {
+            let tags = taglist.getElementsByTagName("input");
 
-    for (let [tag, count] of Object.entries(tag_counts)) {
-        let label = document.getElementById('label_' + tag);
+            for (let element of tags)
+                element.checked = false;
 
-        if (count === 0) {
-            label.parentElement.style.display = 'none';
-            continue;
-        } else {
-            label.parentElement.style.display = 'block';
-        }
-
-        let i = label.innerText.search(/\(\d+\)$/);
-        label.innerText = label.innerText.substring(0, i) + ' (' + count + ')';
-    }
-}
-
-function addTag(tag) {
-    let checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = tag;
-    checkbox.id = "cb_" + tag;
-    checkbox.addEventListener("change", updateViewport);
-
-    let label = document.createElement("label");
-    label.setAttribute("for", checkbox.id);
-    label.setAttribute("id", "label_" + tag);
-    label.innerText = tag + `(0)`;
-
-    let listItem = document.createElement("li");
-    listItem.appendChild(checkbox);
-    listItem.appendChild(label);
-
-    taglist.appendChild(listItem);
-}
-
-function uploadItem(file, tags = ["no tags"]) {
-    let fd = new FormData();
-    fd.append("file", file);
-    fd.append("tags", JSON.stringify(tags));
-
-    fetch("/upload", { method: "POST", body: fd });
-}
-
-function fetchItems() {
-    fetch("/fetch")
-        .then(response => response.json())
-        .then(data => {
-            viewport.textContent = '';
-            taglist.textContent = '';
-
-            tagfs = new JsonTagFS(data);
-            tagfs.files.forEach(file =>
-                viewport.appendChild(file.element)
-            );
-
-            tagfs.tags.forEach(addTag);
-        })
-        .catch(error => {
-            console.error("Error fetching the JSON file:", error);
+            this.updateViewport();
         });
-}
 
-const taglist = document.getElementById("taglist");
-const viewport = document.getElementById("viewport");
-
-let tagfs;
-fetchItems();
-
-document.getElementById("clear").addEventListener("click", () => {
-    let tags = taglist.getElementsByTagName("input");
-
-    for (let element of tags)
-        element.checked = false;
-
-    updateViewport();
-});
-
-
-let fileInput = document.getElementById('fileElem');
-fileInput.addEventListener('change', () => {
-    displayModal(fileInput.files[0]);
-});
-
-let dropArea = document.getElementById('drop-area');
-
-(['dragenter', 'dragover', 'dragleave', 'drop']).forEach(eventName => {
-    dropArea.addEventListener(eventName, preventDefaults, false);
-})
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-
-function highlight(e) {
-    dropArea.classList.add('highlight')
-}
-
-function unhighlight(e) {
-    dropArea.classList.remove('highlight')
-}
-
-(['dragenter', 'dragover']).forEach(eventName => {
-    dropArea.addEventListener(eventName, highlight, false)
-});
-
-(['dragleave', 'drop']).forEach(eventName => {
-    dropArea.addEventListener(eventName, unhighlight, false)
-});
-
-dropArea.addEventListener('drop', handleDrop, false)
-
-function handleDrop(e) {
-    let dt = e.dataTransfer;
-    let files = dt.files;
-
-    if (files.length > 1) {
-        for (let file of files)
-            uploadItem(file);
-
-        return;
     }
 
-    displayModal(files[0]);
-}
+    addTag(tag) {
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = tag;
+        checkbox.id = "cb_" + tag;
+        checkbox.addEventListener("change", this.updateViewport);
 
+        let label = document.createElement("label");
+        label.setAttribute("for", checkbox.id);
+        label.setAttribute("id", "label_" + tag);
+        label.innerText = tag + `(0)`;
 
-let modal = document.getElementById('modal');
-let modalView = document.getElementById('right');
-document.getElementById('modalClose').addEventListener('click', closeModal)
+        let listItem = document.createElement("li");
+        listItem.appendChild(checkbox);
+        listItem.appendChild(label);
 
-function showModal() {
-    modal.style.display = 'flex';
-}
+        this.#taglist.appendChild(listItem);
+    }
 
-function closeModal() {
-    modal.style.display = 'none';
-}
+    addImage(elem) {
+        this.#viewport.appendChild(elem);
+    }
 
+    updateViewport() {
+        let checkboxes = this.#taglist.getElementsByTagName("input");
+        checkboxes = Array.from(checkboxes);
 
-function displayModal(file) {
-    if (!file)
-        return;
+        const activeFilters = checkboxes.filter(ch => ch.checked).map(ch => ch.name);
+        let filteredFiles = tagfs.filter(activeFilters);
 
-    showModal();
+        let tag_counts = {};
+        tagfs.tags.forEach(tag => tag_counts[tag] = 0);
 
-    let fileType = file.type.split('/')[0];
-    if (fileType == 'image') {
-        modalView.textContent = "";
-        let element = new Image();
+        tagfs.files.forEach(file => {
+            if (filteredFiles.includes(file)) {
+                file.element.style.display = "block";
+                file.tags.forEach(tag => {
+                    tag_counts[tag] += 1;
+                });
+            } else {
+                file.element.style.display = "none";
+            }
+        });
 
-        var fr = new FileReader();
-        fr.onload = function () {
-            element.src = fr.result;
-            element.data = file;
+        for (let [tag, count] of Object.entries(tag_counts)) {
+            let label = document.getElementById('label_' + tag);
+
+            if (count === 0) {
+                label.parentElement.style.display = 'none';
+                continue;
+            } else {
+                label.parentElement.style.display = 'block';
+            }
+
+            let i = label.innerText.search(/\(\d+\)$/);
+            label.innerText = label.innerText.substring(0, i) + ' (' + count + ')';
         }
-        fr.readAsDataURL(file);
-        modalView.appendChild(element);
     }
 }
 
-let modalTags = document.getElementById('modal-tag-list');
-let tagsInput = document.getElementById('tags-input');
-tagsInput.addEventListener('change', ev => {
-    let elem = document.createElement('span');
-    elem.className = 'tag';
-    elem.innerText = tagsInput.value;
+class ServerCommunication {
+    static uploadItem(file, tags = ["no tags"]) {
+        let fd = new FormData();
+        fd.append("file", file);
+        fd.append("tags", JSON.stringify(tags));
 
-    modalTags.appendChild(elem);
-    tagsInput.value = "";
-});
+        fetch("/upload", { method: "POST", body: fd });
+    }
 
-document.getElementById('modalUpload').addEventListener('click', () => {
-    let tags = [];
-    for (let tag of modalTags.getElementsByClassName('tag'))
-        tags.push(tag.innerText);
+    static fetchItems() {
+        fetch("/fetch")
+            .then(response => response.json())
+            .then(data => {
+                viewport.textContent = '';
+                taglist.textContent = '';
 
-    let image = modalView.firstChild;
+                tagfs = new JsonTagFS(data);
+                tagfs.files.forEach(file =>
+                    viewport.appendChild(file.element)
+                );
 
-    uploadItem(image.data, tags);
-    viewport.appendChild(image);
-    modalView.textContent = '';
-    closeModal();
-});
+                tagfs.tags.forEach(addTag);
+            })
+            .catch(error => {
+                console.error("Error fetching the JSON file:", error);
+            });
+    }
+}
+
+class ModalWindow {
+    #body;
+    #view;
+    #tagList;
+    #tagInput;
+
+    #file;
+    #tags;
+
+    #closeBtn;
+    #uploadBtn;
+
+    constructor() {
+        this.#tags = [];
+        this.#file = null;
+
+        this.#body = document.getElementById('modal');
+        this.#view = document.getElementById('right');
+        this.#closeBtn = document.getElementById('modalClose');
+        this.#uploadBtn = document.getElementById('modalUpload');
+
+        this.#tagList = document.getElementById('modal-tag-list');
+        this.#tagInput = document.getElementById('tags-input');
+        this.#tagInput.addEventListener('change', this.#enterTag);
+
+        this.#uploadBtn.addEventListener('click', this.upload);
+        this.#closeBtn.addEventListener('click', this.close);
+    }
+
+    show() {
+        this.#body.style.display = 'flex';
+    }
+
+    close() {
+        this.#body.style.display = 'none';
+        this.#tags = [];
+        this.#file = null;
+    }
+
+    observe(file) {
+        if (!file)
+            return;
+
+        this.#file = file;
+        this.show();
+
+        let fileType = file.type.split('/')[0];
+        if (fileType == 'image') {
+            this.#view.textContent = "";
+
+            let element = new Image();
+            var fr = new FileReader();
+            fr.onload = function () {
+                element.src = fr.result;
+                element.data = file;
+            }
+            fr.readAsDataURL(file);
+        } else {
+            alert('Unknow file format:' + fileType);
+        }
+    }
+
+    upload() {
+        let image = modalView.firstChild;
+
+        ServerCommunication.uploadItem(image.data, this.#tags);
+        viewport.appendChild(image);
+        modalView.textContent = '';
+        this.close();
+    }
+
+    #enterTag() {
+        let tag = tagsInput.value;
+
+        let elem = document.createElement('span');
+        elem.className = 'tag';
+        elem.innerText = tag;
+
+        this.#tags.push(tag);
+        this.#tagList.appendChild(elem);
+        this.#tagInput.value = "";
+    }
+}
+
+class DropArea {
+    #fileInput;
+    #dropArea;
+
+    #mw;
+
+    constructor(mw) {
+        this.#mw = mw;
+
+        this.#fileInput = document.getElementById('fileElem');
+        this.#dropArea = document.getElementById('drop-area');
+
+        this.#fileInput.addEventListener('change', this.#handleSelection);
+
+        addEventListeners(this.#dropArea, ['dragenter', 'dragover', 'dragleave', 'drop'], this.#preventDefaults);
+        addEventListeners(this.#dropArea, ['dragenter', 'dragover'], this.#highlight);
+        addEventListeners(this.#dropArea, ['dragleave', 'drop'], this.#unhighlight);
+        this.#dropArea.addEventListener('drop', this.#handleDrop, false);
+    }
+
+    #preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    #highlight(e) {
+        this.#dropArea.classList.add('highlight');
+    }
+
+    #unhighlight(e) {
+        this.#dropArea.classList.remove('highlight');
+    }
+
+    #handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+
+        if (files.length > 1) {
+            for (let file of files)
+                uploadItem(file);
+
+            return;
+        }
+
+        this.#mw.prompt(files[0]);
+    }
+
+    #handleSelection(e) {
+        this.#mw.prompt(files[0]);
+    }
+}
+
+function addEventListeners(object, events, action) {
+    events.forEach(ev => {
+        object.addEventListener(ev, action, false);
+    });
+}
+
+const ui = new UIManager();
+const mw = new ModalWindow();
+const da = new DropArea(mw);
+
+ServerCommunication.fetchItems()

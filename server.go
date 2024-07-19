@@ -141,7 +141,7 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	if err := os.MkdirAll("./vault/", os.ModePerm); err != nil {
+	if err := os.MkdirAll("./src/vault/", os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 
@@ -153,10 +153,7 @@ func main() {
 	defer db.Close()
 
 	static := http.FileServer(http.Dir("./src"))
-	vault := http.FileServer(http.Dir("./vault"))
-
 	http.Handle("/", static)
-	http.Handle("/vault", vault)
 
 	http.HandleFunc("/fetch", fetchItems)
 	http.HandleFunc("/upload", uploadItem)

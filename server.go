@@ -112,6 +112,7 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	if file == nil || err != nil {
 		log.Fatal(err)
 	}
+	defer reader.Close()
 
 	_mimetype, err := mimetype.DetectReader(reader)
 	if err != nil {
@@ -135,6 +136,7 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer fout.Close()
 
 	fout.ReadFrom(reader)
 	addItem(path.Join(mimeRoot, fname), fname, mime, tags)

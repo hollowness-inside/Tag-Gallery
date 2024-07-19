@@ -40,7 +40,8 @@ func initDB(path string) (*sql.DB, error) {
 	return conn, nil
 }
 
-func getNextId() (lastid int) {
+func getNextId() int {
+	var lastid int
 	err := db.QueryRow("SELECT seq FROM sqlite_sequence WHERE name=\"vault\"").Scan(&lastid)
 	if err == sql.ErrNoRows {
 		return 1
@@ -50,7 +51,7 @@ func getNextId() (lastid int) {
 		log.Fatal(err)
 	}
 
-	return
+	return lastid + 1
 }
 
 func addItem(path, name, typ string, jtags string) {

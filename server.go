@@ -66,7 +66,9 @@ func fetchItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	db, err := initDB("vault.db")
+
+	var err error
+	db, err = initDB("vault.db")
 	if err != nil {
 		log.Fatal(err)
 	}

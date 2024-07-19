@@ -1,13 +1,15 @@
 import { JsonTagFS } from "../jfs.js";
 import { Item } from "./item.js";
+import { TagFS } from "./tagfs.js";
 
 class App {
     constructor() {
-        const ui = new UIManager();
+        const tagfs = new JsonTagFS();
+        const ui = new UIManager(tagfs);
         const mw = new ModalWindow(ui);
         new DropArea(ui, mw);
-
-        ServerCommunication.fetchItems(ui);
+        
+        ServerCommunication.fetchItems(tagfs, ui);
     }
 }
 
@@ -36,8 +38,17 @@ class UIManager {
      */
     #tags;
 
-    constructor() {
+    /**
+     * @type {TagFS}
+     */
+    #tagfs;
+
+    /**
+     * @param {TagFS} tagfs
+     */
+    constructor(tagfs) {
         this.#tags = [];
+        this.#tagfs = tagfs;
 
         this.#viewport = document.getElementById("viewport");
         this.#taglist = document.getElementById("taglist");
@@ -103,12 +114,12 @@ class UIManager {
         checkboxes = Array.from(checkboxes);
 
         const activeFilters = checkboxes.filter(ch => ch.checked).map(ch => ch.name);
-        let filteredFiles = tagfs.filter(activeFilters);
+        let filteredFiles = this.#tagfs.filter(activeFilters);
 
         let tag_counts = {};
-        tagfs.tags.forEach(tag => tag_counts[tag] = 0);
+        this.#tagfs.tags.forEach(tag => tag_counts[tag] = 0);
 
-        tagfs.files.forEach(file => {
+        this.#tagfs.files.forEach(file => {
             if (filteredFiles.includes(file)) {
                 file.element.style.display = "block";
                 file.tags.forEach(tag => {
@@ -176,15 +187,16 @@ class ServerCommunication {
 
     /**
      * Requests the backend server to retreive the list of items in the vault.
+     * @param {TagFS} tagfs
      * @param {UIManager} ui 
      */
-    static fetchItems(ui) {
+    static fetchItems(tagfs, ui) {
         fetch("/fetch")
             .then(response => response.json())
             .then(data => {
                 ui.clear();
 
-                let tagfs = new JsonTagFS(data);
+                tagfs.update(data);
                 tagfs.files.forEach(file =>
                     ui.addElement(file.element)
                 );

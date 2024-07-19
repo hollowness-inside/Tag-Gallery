@@ -5,18 +5,19 @@ export class JsonTagFS extends TagFS {
     #files;
     #tags;
 
-    constructor(data) {
+    constructor() {
         super();
 
         this.#files = [];
         this.#tags = [];
+    }
 
+    update(data) {
         for (let item of data) {
             let tags = item["tags"];
             this.addTags(tags);
             this.addItem(item);
         }
-
     }
 
     get files() {

@@ -55,6 +55,14 @@ function addTag(tag) {
     taglist.appendChild(listItem);
 }
 
+function uploadItem(file) {
+    let fd = new FormData();
+    fd.append("file", file);
+    fd.append("tags", '["no tags"]');
+
+    fetch("/upload", { method: "POST", body: fd })
+}
+
 const taglist = document.getElementById("taglist");
 const viewport = document.getElementById("viewport");
 
@@ -83,14 +91,43 @@ document.getElementById("clear").addEventListener("click", () => {
     updateViewport();
 });
 
-document.getElementById("upload").addEventListener("click", () => {
-    let file = document.getElementById("finp").files[0];
 
-    let fd = new FormData();
-    fd.append("file", file);
-    fd.append("tags", '["no tags"]');
+let dropArea = document.getElementById('drop-area');
 
-    fetch("/upload", { method: "POST", body: fd })
+document.getElementById('fileElem').addEventListener('change', uploadItem);
+
+
+(['dragenter', 'dragover', 'dragleave', 'drop']).forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+})
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+
+function highlight(e) {
+    dropArea.classList.add('highlight')
+}
+
+function unhighlight(e) {
+    dropArea.classList.remove('highlight')
+}
+
+(['dragenter', 'dragover']).forEach(eventName => {
+    dropArea.addEventListener(eventName, highlight, false)
 });
 
-document.body.onload = () => updateViewport();
+(['dragleave', 'drop']).forEach(eventName => {
+    dropArea.addEventListener(eventName, unhighlight, false)
+});
+
+dropArea.addEventListener('drop', handleDrop, false)
+
+function handleDrop(e) {
+    let dt = e.dataTransfer
+    let files = dt.files
+
+    uploadItem(files[0])
+}

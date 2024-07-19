@@ -8,7 +8,9 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/neox5/go-formdata"
 )
@@ -28,8 +30,9 @@ func initDB(path string) (*sql.DB, error) {
 
 	if _, err = conn.Exec(`CREATE TABLE IF NOT EXISTS vault (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
+                path TEXT NOT NULL,
                 name STR(128) NOT NULL,
-                type STR(5),
+                type TEXT,
                 tags TEXT);`); err != nil {
 		return nil, err
 	}
@@ -50,8 +53,8 @@ func getNextId() (lastid int) {
 	return
 }
 
-func addItem(name, typ string, jtags string) {
-	_, err := db.Exec("INSERT INTO vault (name, type, tags) VALUES (?, ?, ?)", name, typ, jtags)
+func addItem(path, name, typ string, jtags string) {
+	_, err := db.Exec("INSERT INTO vault (path, name, type, tags) VALUES (?, ?, ?, ?)", path, name, typ, jtags)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,30 +103,42 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tags := fd.Get("tags").First()
-	typ := fd.Get("type").First()
-
 	file := fd.GetFile("file").First()
+
 	reader, err := file.Open()
-	if err != nil {
-		return
+	if file == nil || err != nil {
+		log.Fatal(err)
 	}
+
+	_mimetype, err := mimetype.DetectReader(reader)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mime := _mimetype.String()
+	mimeRoot := strings.Split(mime, "/")[0]
+	reader.Seek(0, 0)
 
 	fname := strconv.Itoa(getNextId())
 	fext := path.Ext(file.Filename)
 	fname = fname + fext
 
-	fpath := path.Join("./src/vault/", fname)
+	dirPath := path.Join("./src/vault/", mimeRoot)
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+
+	fpath := path.Join(dirPath, fname)
 	fout, err := os.Create(fpath)
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
 
 	fout.ReadFrom(reader)
-	addItem(fname, typ, tags)
+	addItem(path.Join(mimeRoot, fname), fname, mime, tags)
 }
 
 func main() {
-	if err := os.MkdirAll("./src/vault/", os.ModePerm); err != nil {
+	if err := os.MkdirAll("./vault/", os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 
@@ -134,8 +149,12 @@ func main() {
 	}
 	defer db.Close()
 
-	fs := http.FileServer(http.Dir("./src"))
-	http.Handle("/", fs)
+	static := http.FileServer(http.Dir("./src"))
+	vault := http.FileServer(http.Dir("./vault"))
+
+	http.Handle("/", static)
+	http.Handle("/vault", vault)
+
 	http.HandleFunc("/fetch", fetchItems)
 	http.HandleFunc("/upload", uploadItem)
 

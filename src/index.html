@@ -6,9 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tag Gallery</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="modal.css">
 </head>
 
 <body>
+    <div id="modal">
+        <div class="main">
+            <div class="left">
+                <h2>Enter tags</h2>
+                <div id="modal-tag-list">
+                </div>
+                <input type="text" id="tags-input" placeholder="Tags here...">
+                <button id="modalUpload">Upload</button>
+                <button id="modalClose">Close</button>
+            </div>
+
+            <div id="right"></div>
+        </div>
+    </div>
+
     <div id="navbar">
         <header>
             <button id="clear">Clear all filters</button>

@@ -55,32 +55,38 @@ function addTag(tag) {
     taglist.appendChild(listItem);
 }
 
-function uploadItem(file) {
+function uploadItem(file, tags = ["no tags"]) {
     let fd = new FormData();
     fd.append("file", file);
-    fd.append("tags", '["no tags"]');
+    fd.append("tags", JSON.stringify(tags));
 
-    fetch("/upload", { method: "POST", body: fd })
+    fetch("/upload", { method: "POST", body: fd });
+}
+
+function fetchItems() {
+    fetch("/fetch")
+        .then(response => response.json())
+        .then(data => {
+            viewport.textContent = '';
+            taglist.textContent = '';
+
+            tagfs = new JsonTagFS(data);
+            tagfs.files.forEach(file =>
+                viewport.appendChild(file.element)
+            );
+
+            tagfs.tags.forEach(addTag);
+        })
+        .catch(error => {
+            console.error("Error fetching the JSON file:", error);
+        });
 }
 
 const taglist = document.getElementById("taglist");
 const viewport = document.getElementById("viewport");
 
 let tagfs;
-
-fetch("/fetch")
-    .then(response => response.json())
-    .then(data => {
-        tagfs = new JsonTagFS(data);
-        tagfs.files.forEach(file =>
-            viewport.appendChild(file.element)
-        );
-
-        tagfs.tags.forEach(addTag);
-    })
-    .catch(error => {
-        console.error("Error fetching the JSON file:", error);
-    });
+fetchItems();
 
 document.getElementById("clear").addEventListener("click", () => {
     let tags = taglist.getElementsByTagName("input");
@@ -92,10 +98,12 @@ document.getElementById("clear").addEventListener("click", () => {
 });
 
 
+let fileInput = document.getElementById('fileElem');
+fileInput.addEventListener('change', () => {
+    displayModal(fileInput.files[0]);
+});
+
 let dropArea = document.getElementById('drop-area');
-
-document.getElementById('fileElem').addEventListener('change', uploadItem);
-
 
 (['dragenter', 'dragover', 'dragleave', 'drop']).forEach(eventName => {
     dropArea.addEventListener(eventName, preventDefaults, false);
@@ -126,8 +134,74 @@ function unhighlight(e) {
 dropArea.addEventListener('drop', handleDrop, false)
 
 function handleDrop(e) {
-    let dt = e.dataTransfer
-    let files = dt.files
+    let dt = e.dataTransfer;
+    let files = dt.files;
 
-    uploadItem(files[0])
+    if (files.length > 1) {
+        for (let file of files)
+            uploadItem(file);
+
+        return;
+    }
+
+    displayModal(files[0]);
 }
+
+
+let modal = document.getElementById('modal');
+let modalView = document.getElementById('right');
+document.getElementById('modalClose').addEventListener('click', closeModal)
+
+function showModal() {
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    modal.style.display = 'none';
+}
+
+
+function displayModal(file) {
+    if (!file)
+        return;
+
+    showModal();
+
+    let fileType = file.type.split('/')[0];
+    if (fileType == 'image') {
+        modalView.textContent = "";
+        let element = new Image();
+
+        var fr = new FileReader();
+        fr.onload = function () {
+            element.src = fr.result;
+            element.data = file;
+        }
+        fr.readAsDataURL(file);
+        modalView.appendChild(element);
+    }
+}
+
+let modalTags = document.getElementById('modal-tag-list');
+let tagsInput = document.getElementById('tags-input');
+tagsInput.addEventListener('change', ev => {
+    let elem = document.createElement('span');
+    elem.className = 'tag';
+    elem.innerText = tagsInput.value;
+
+    modalTags.appendChild(elem);
+    tagsInput.value = "";
+});
+
+document.getElementById('modalUpload').addEventListener('click', () => {
+    let tags = [];
+    for (let tag of modalTags.getElementsByClassName('tag'))
+        tags.push(tag.innerText);
+
+    let image = modalView.firstChild;
+
+    uploadItem(image.data, tags);
+    viewport.appendChild(image);
+    modalView.textContent = '';
+    closeModal();
+});

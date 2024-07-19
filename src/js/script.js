@@ -83,4 +83,14 @@ document.getElementById("clear").addEventListener("click", () => {
     updateViewport();
 });
 
+document.getElementById("upload").addEventListener("click", () => {
+    let file = document.getElementById("finp").files[0];
+
+    let fd = new FormData();
+    fd.append("file", file);
+    fd.append("tags", '["no tags"]');
+
+    fetch("/upload", { method: "POST", body: fd })
+});
+
 document.body.onload = () => updateViewport();

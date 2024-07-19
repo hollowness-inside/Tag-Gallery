@@ -1,5 +1,15 @@
 import { JsonTagFS } from "../jfs.js";
 
+class App {
+    constructor() {
+        const ui = new UIManager();
+        const mw = new ModalWindow(ui);
+        new DropArea(mw);
+
+        ServerCommunication.fetchItems(ui);
+    }
+}
+
 class UIManager {
     #viewport;
 
@@ -27,7 +37,7 @@ class UIManager {
         checkbox.type = "checkbox";
         checkbox.name = tag;
         checkbox.id = "cb_" + tag;
-        checkbox.addEventListener("change", this.updateViewport);
+        checkbox.addEventListener("change", () => this.updateViewport());
 
         let label = document.createElement("label");
         label.setAttribute("for", checkbox.id);
@@ -80,6 +90,19 @@ class UIManager {
             label.innerText = label.innerText.substring(0, i) + ' (' + count + ')';
         }
     }
+
+    clearViewport() {
+        this.#viewport.textContent = '';
+    }
+
+    clearTaglist() {
+        this.#taglist.textContent = '';
+    }
+
+    clear() {
+        this.clearViewport();
+        this.clearTaglist();
+    }
 }
 
 class ServerCommunication {
@@ -91,19 +114,24 @@ class ServerCommunication {
         fetch("/upload", { method: "POST", body: fd });
     }
 
-    static fetchItems() {
+    /**
+     * 
+     * @param {UIManager} ui 
+     */
+    static fetchItems(ui) {
         fetch("/fetch")
             .then(response => response.json())
             .then(data => {
-                viewport.textContent = '';
-                taglist.textContent = '';
+                ui.clear();
 
-                tagfs = new JsonTagFS(data);
+                let tagfs = new JsonTagFS(data);
                 tagfs.files.forEach(file =>
-                    viewport.appendChild(file.element)
+                    ui.addImage(file.element)
                 );
 
-                tagfs.tags.forEach(addTag);
+                console.log(tagfs);
+
+                tagfs.tags.forEach(tag => ui.addTag(tag));
             })
             .catch(error => {
                 console.error("Error fetching the JSON file:", error);
@@ -112,20 +140,21 @@ class ServerCommunication {
 }
 
 class ModalWindow {
+    #ui;
+
     #body;
     #view;
     #tagList;
     #tagInput;
 
-    #file;
+    #element;
     #tags;
 
     #closeBtn;
     #uploadBtn;
 
-    constructor() {
-        this.#tags = [];
-        this.#file = null;
+    constructor(ui) {
+        this.#ui = ui;
 
         this.#body = document.getElementById('modal');
         this.#view = document.getElementById('right');
@@ -134,10 +163,12 @@ class ModalWindow {
 
         this.#tagList = document.getElementById('modal-tag-list');
         this.#tagInput = document.getElementById('tags-input');
-        this.#tagInput.addEventListener('change', this.#enterTag);
 
-        this.#uploadBtn.addEventListener('click', this.upload);
-        this.#closeBtn.addEventListener('click', this.close);
+        this.#tagInput.addEventListener('change', () => this.#enterTag());
+        this.#uploadBtn.addEventListener('click', () => this.upload());
+        this.#closeBtn.addEventListener('click', () => this.close());
+
+        this.#reset();
     }
 
     show() {
@@ -146,15 +177,21 @@ class ModalWindow {
 
     close() {
         this.#body.style.display = 'none';
+        this.#reset();
+    }
+
+    #reset() {
+        this.#view.textContent = '';
+        this.#tagList.textContent = '';
+
         this.#tags = [];
-        this.#file = null;
+        this.#element = null;
     }
 
     observe(file) {
         if (!file)
             return;
 
-        this.#file = file;
         this.show();
 
         let fileType = file.type.split('/')[0];
@@ -163,27 +200,32 @@ class ModalWindow {
 
             let element = new Image();
             var fr = new FileReader();
-            fr.onload = function () {
+            fr.onload = () => {
                 element.src = fr.result;
                 element.data = file;
             }
             fr.readAsDataURL(file);
+            this.#element = element;
+            this.#view.appendChild(this.#element);
         } else {
-            alert('Unknow file format:' + fileType);
+            alert('Unknow file format: ' + fileType);
+            this.close();
+            return;
         }
     }
 
     upload() {
-        let image = modalView.firstChild;
+        ServerCommunication.uploadItem(this.#element.data, this.#tags);
 
-        ServerCommunication.uploadItem(image.data, this.#tags);
-        viewport.appendChild(image);
-        modalView.textContent = '';
+        for (let tag of this.#tags)
+            this.#ui.addTag(tag);
+
+        this.#ui.addImage(this.#element);
         this.close();
     }
 
     #enterTag() {
-        let tag = tagsInput.value;
+        let tag = this.#tagInput.value;
 
         let elem = document.createElement('span');
         elem.className = 'tag';
@@ -199,20 +241,27 @@ class DropArea {
     #fileInput;
     #dropArea;
 
+    /**
+     * @type {ModalWindow}
+     */
     #mw;
 
+    /**
+     * 
+     * @param {ModalWindow} mw 
+     */
     constructor(mw) {
         this.#mw = mw;
 
         this.#fileInput = document.getElementById('fileElem');
         this.#dropArea = document.getElementById('drop-area');
 
-        this.#fileInput.addEventListener('change', this.#handleSelection);
+        this.#fileInput.addEventListener('change', () => this.#onSelect());
 
-        addEventListeners(this.#dropArea, ['dragenter', 'dragover', 'dragleave', 'drop'], this.#preventDefaults);
-        addEventListeners(this.#dropArea, ['dragenter', 'dragover'], this.#highlight);
-        addEventListeners(this.#dropArea, ['dragleave', 'drop'], this.#unhighlight);
-        this.#dropArea.addEventListener('drop', this.#handleDrop, false);
+        addEventListeners(this.#dropArea, ['dragenter', 'dragover', 'dragleave', 'drop'], e => this.#preventDefaults(e));
+        addEventListeners(this.#dropArea, ['dragenter', 'dragover'], e => this.#highlight(e));
+        addEventListeners(this.#dropArea, ['dragleave', 'drop'], e => this.#unhighlight(e));
+        this.#dropArea.addEventListener('drop', e => this.#onDrop(e), false);
     }
 
     #preventDefaults(e) {
@@ -228,22 +277,22 @@ class DropArea {
         this.#dropArea.classList.remove('highlight');
     }
 
-    #handleDrop(e) {
+    #onDrop(e) {
         let dt = e.dataTransfer;
         let files = dt.files;
 
         if (files.length > 1) {
             for (let file of files)
-                uploadItem(file);
+                ServerCommunication.uploadItem(file);
 
             return;
         }
 
-        this.#mw.prompt(files[0]);
+        this.#mw.observe(files[0]);
     }
 
-    #handleSelection(e) {
-        this.#mw.prompt(files[0]);
+    #onSelect(e) {
+        this.#mw.observe(this.#fileInput.files[0]);
     }
 }
 
@@ -253,8 +302,4 @@ function addEventListeners(object, events, action) {
     });
 }
 
-const ui = new UIManager();
-const mw = new ModalWindow();
-const da = new DropArea(mw);
-
-ServerCommunication.fetchItems()
+let app = new App();

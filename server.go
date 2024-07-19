@@ -18,8 +18,10 @@ import (
 var db *sql.DB
 
 type Item struct {
-	Path string   `json:"path"`
-	Tags []string `json:"tags"`
+	Path     string   `json:"path"`
+	Name     string   `json:"name"`
+	Mimetype string   `json:"type"`
+	Tags     []string `json:"tags"`
 }
 
 func initDB(path string) (*sql.DB, error) {
@@ -73,19 +75,19 @@ func fetchItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	items := make([]Item, 0, count)
-	rows, err := db.Query("SELECT name, tags FROM vault")
+	rows, err := db.Query("SELECT path, name, type, tags FROM vault")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for rows.Next() {
-		var fname, jtags string
-		rows.Scan(&fname, &jtags)
+		var path, name, mtype, jtags string
+		rows.Scan(&path, &name, &mtype, &jtags)
 
 		var tags []string
 		json.Unmarshal([]byte(jtags), &tags)
 
-		item := Item{fname, tags}
+		item := Item{path, name, mtype, tags}
 		items = append(items, item)
 	}
 

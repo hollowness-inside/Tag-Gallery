@@ -1,10 +1,11 @@
 import { JsonTagFS } from "../jfs.js";
+import { Item } from "./item.js";
 
 class App {
     constructor() {
         const ui = new UIManager();
         const mw = new ModalWindow(ui);
-        new DropArea(mw);
+        new DropArea(ui, mw);
 
         ServerCommunication.fetchItems(ui);
     }
@@ -93,7 +94,7 @@ class UIManager {
      * Adds an element to the viewport.
      * @param {HTMLElement} elem element to be added to the viewport.
      */
-    addImage(elem) {
+    addElement(elem) {
         this.#viewport.appendChild(elem);
     }
 
@@ -185,7 +186,7 @@ class ServerCommunication {
 
                 let tagfs = new JsonTagFS(data);
                 tagfs.files.forEach(file =>
-                    ui.addImage(file.element)
+                    ui.addElement(file.element)
                 );
 
                 tagfs.tags.forEach(tag => ui.addTag(tag));
@@ -303,16 +304,9 @@ class ModalWindow {
 
         let fileType = file.type.split("/")[0];
         if (fileType == "image") {
-            this.#view.textContent = "";
+            this.#element = fileToElement(file);
 
-            let element = new Image();
-            var fr = new FileReader();
-            fr.onload = () => {
-                element.src = fr.result;
-                element.data = file;
-            }
-            fr.readAsDataURL(file);
-            this.#element = element;
+            this.#view.textContent = "";
             this.#view.appendChild(this.#element);
         } else {
             alert("Unknow file format: " + fileType);
@@ -330,7 +324,7 @@ class ModalWindow {
         for (let tag of this.#tags)
             this.#ui.addTag(tag);
 
-        this.#ui.addImage(this.#element);
+        this.#ui.addElement(this.#element);
         this.close();
     }
 
@@ -371,11 +365,18 @@ class DropArea {
     #mw;
 
     /**
+     * @type {UIManager}
+     */
+    #ui;
+
+    /**
      * 
+     * @param {UIManager} ui
      * @param {ModalWindow} mw modal window to be uesd.
      */
-    constructor(mw) {
+    constructor(ui, mw) {
         this.#mw = mw;
+        this.#ui = ui;
 
         this.#fileInput = document.getElementById("fileElem");
         this.#dropArea = document.getElementById("drop-area");
@@ -417,9 +418,14 @@ class DropArea {
         let files = dt.files;
 
         if (files.length > 1) {
-            for (let file of files)
+            for (let file of files) {
                 ServerCommunication.uploadItem(file);
 
+                let el = fileToElement(file);
+                this.#ui.addElement(el);
+            }
+
+            this.#ui.addTag("no tags");
             return;
         }
 
@@ -444,6 +450,28 @@ function addEventListeners(listener, events, action) {
     events.forEach(ev => {
         listener.addEventListener(ev, action, false);
     });
+}
+
+/**
+ * Converts a file to item
+ * @param {File} file
+ * @returns {Item}
+ */
+function fileToElement(file) {
+    let fileType = file.type.split("/")[0];
+    if (fileType == "image") {
+        let element = new Image();
+        var fr = new FileReader();
+
+        fr.onload = () => {
+            element.src = fr.result;
+        }
+        fr.readAsDataURL(file);
+
+        return element;
+    } else {
+        alert('Uknown file format: ' + fileType);
+    }
 }
 
 let app = new App();

@@ -3,7 +3,7 @@ package main
 import "log"
 
 func main() {
-	dbVault, err := NewDbVault("../web/vault/", "../vault.db")
+	dbVault, err := NewPlainVault("../vault/", "../vault/vault.db")
 	if err != nil {
 		log.Fatal("Cannot create DbVault: ", err)
 	}

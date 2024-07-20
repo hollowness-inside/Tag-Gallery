@@ -12,12 +12,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type DbVault struct {
+type PlainVault struct {
 	dirPath string
 	db      *sql.DB
 }
 
-func NewDbVault(dirPath, dbPath string) (*DbVault, error) {
+func NewPlainVault(dirPath, dbPath string) (*PlainVault, error) {
 	err := os.MkdirAll(dirPath, os.ModePerm)
 	if err != nil {
 		return nil, err
@@ -28,20 +28,20 @@ func NewDbVault(dirPath, dbPath string) (*DbVault, error) {
 		return nil, err
 	}
 
-	return &DbVault{dirPath, db}, nil
+	return &PlainVault{dirPath, db}, nil
 }
 
-func (v *DbVault) UploadItem(extension string, mime string, tags []string, reader io.ReadSeeker) (err error) {
+func (vault *PlainVault) UploadItem(extension string, mime string, tags []string, reader io.ReadSeeker) (err error) {
 	mimeRoot := strings.Split(mime, "/")[0]
 	reader.Seek(0, 0)
 
-	dirPath := path.Join(v.dirPath, mimeRoot)
+	dirPath := path.Join(vault.dirPath, mimeRoot)
 	if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
 		return
 	}
 
 	jtags, _ := json.Marshal(tags)
-	nextID, err := v.addItem(extension, mimeRoot, mime, jtags)
+	nextID, err := vault.addItem(extension, mimeRoot, mime, jtags)
 	if err != nil {
 		return
 	}
@@ -61,15 +61,15 @@ func (v *DbVault) UploadItem(extension string, mime string, tags []string, reade
 	return
 }
 
-func (v *DbVault) GetItems() ([]Item, error) {
+func (vault *PlainVault) GetItems() ([]Item, error) {
 	var count int
-	err := v.db.QueryRow("SELECT COUNT(*) FROM vault").Scan(&count)
+	err := vault.db.QueryRow("SELECT COUNT(*) FROM vault").Scan(&count)
 	if err != nil {
 		return nil, err
 	}
 
 	items := make([]Item, 0, count)
-	rows, err := v.db.Query("SELECT id, extension, directory, type, tags FROM vault")
+	rows, err := vault.db.Query("SELECT id, extension, directory, type, tags FROM vault")
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +92,8 @@ func (v *DbVault) GetItems() ([]Item, error) {
 	return items, nil
 }
 
-func (v *DbVault) Close() error {
-	return v.db.Close()
+func (vault *PlainVault) Close() error {
+	return vault.db.Close()
 }
 
 func initDB(path string) (*sql.DB, error) {
@@ -117,8 +117,8 @@ func initDB(path string) (*sql.DB, error) {
 	return conn, nil
 }
 
-func (v *DbVault) addItem(extension, directory, fileType string, tagsJSON []byte) (int64, error) {
-	result, err := v.db.Exec("INSERT INTO vault (extension, directory, type, tags) VALUES (?, ?, ?, ?)", extension, directory, fileType, tagsJSON)
+func (vault *PlainVault) addItem(extension, directory, fileType string, tagsJSON []byte) (int64, error) {
+	result, err := vault.db.Exec("INSERT INTO vault (extension, directory, type, tags) VALUES (?, ?, ?, ?)", extension, directory, fileType, tagsJSON)
 	if err != nil {
 		return 0, err
 	}

@@ -20,12 +20,6 @@ export class UIManager {
     #clearBtn;
 
     /**
-     * Array of tags in the tag list.
-     * @type {string[]}
-     */
-    #tags;
-
-    /**
      * @type {JsonTagFS}
      */
     #tagfs;
@@ -34,7 +28,6 @@ export class UIManager {
      * @param {JsonTagFS} tagfs
      */
     constructor(tagfs) {
-        this.#tags = [];
         this.#tagfs = tagfs;
 
         this.#viewport = document.getElementById("viewport");
@@ -81,10 +74,9 @@ export class UIManager {
      * @param {string} tag tag to be added
      */
     addTag(tag) {
-        if (this.#tags.includes(tag))
+        if (this.#tagfs.hasTag(tag))
             return;
 
-        this.#tags.push(tag);
         this.#addTag(tag);
     }
 

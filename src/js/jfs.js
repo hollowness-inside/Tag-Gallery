@@ -92,6 +92,15 @@ export class JsonTagFS {
     }
 
     /**
+     * Checks if the given tag exists.
+     * @param {string} tag tag to be checked for existence.
+     * @returns {bool}
+     */
+    hasTag(tag) {
+        return this.#tags.includes(tag);
+    }
+
+    /**
      * Filters files based on the provided tags.
      * @param {string[]} activeTags - The tags to filter by.
      * @returns {[Item[], Item[], {}]} An array of files that match the filter criteria.
@@ -100,8 +109,8 @@ export class JsonTagFS {
         if (activeTags.length === 0) {
             let tagCounts = {};
 
-            this.items.forEach(file => 
-                file.tags.forEach(tag => 
+            this.items.forEach(file =>
+                file.tags.forEach(tag =>
                     tagCounts[tag] = (tagCounts[tag] || 0) + 1
                 )
             );

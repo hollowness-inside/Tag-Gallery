@@ -103,6 +103,10 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	tags := fd.Get("tags").First()
 	file := fd.GetFile("file").First()
 
+	if file == nil {
+		log.Fatal("No item to upload", file)
+	}
+
 	reader, err := file.Open()
 	if file == nil || err != nil {
 		log.Fatal(err)

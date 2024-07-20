@@ -61,20 +61,6 @@ func (v *DbVault) UploadItem(extension string, mime string, tags []string, reade
 	return
 }
 
-func (v *DbVault) addItem(extension, directory, fileType string, tagsJSON []byte) (int64, error) {
-	result, err := v.db.Exec("INSERT INTO vault (extension, directory, type, tags) VALUES (?, ?, ?, ?)", extension, directory, fileType, tagsJSON)
-	if err != nil {
-		return 0, err
-	}
-
-	rowID, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return rowID, nil
-}
-
 func (v *DbVault) GetItems() ([]Item, error) {
 	var count int
 	err := v.db.QueryRow("SELECT COUNT(*) FROM vault").Scan(&count)
@@ -129,4 +115,18 @@ func initDB(path string) (*sql.DB, error) {
 	}
 
 	return conn, nil
+}
+
+func (v *DbVault) addItem(extension, directory, fileType string, tagsJSON []byte) (int64, error) {
+	result, err := v.db.Exec("INSERT INTO vault (extension, directory, type, tags) VALUES (?, ?, ?, ?)", extension, directory, fileType, tagsJSON)
+	if err != nil {
+		return 0, err
+	}
+
+	rowID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowID, nil
 }

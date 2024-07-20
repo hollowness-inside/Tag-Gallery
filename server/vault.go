@@ -1,7 +1,9 @@
 package main
 
+import "io"
+
 type Vault interface {
-	AddItem(string, string, string, string) (int64, error)
+	UploadItem(string, []string, io.ReadSeeker) error
 	GetItems() ([]Item, error)
 	Close() error
 }

@@ -4,12 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"path"
-	"strconv"
-	"strings"
 
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/neox5/go-formdata"
 )
 
@@ -62,9 +57,11 @@ func (server *Server) uploadItem(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Failed to parse form data: %v", err)
 	}
 
-	tags := form.Get("tags").First()
-	file := form.GetFile("file").First()
+	var tags []string
+	jtags := form.Get("tags").First()
+	json.Unmarshal([]byte(jtags), &tags)
 
+	file := form.GetFile("file").First()
 	if file == nil {
 		log.Fatal("No file to upload")
 	}
@@ -75,34 +72,8 @@ func (server *Server) uploadItem(w http.ResponseWriter, r *http.Request) {
 	}
 	defer reader.Close()
 
-	mimeType, err := mimetype.DetectReader(reader)
+	err = server.vault.UploadItem(file.Filename, tags, reader)
 	if err != nil {
-		log.Fatalf("Failed to detect MIME type: %v", err)
-	}
-	mime := mimeType.String()
-	mimeRoot := strings.Split(mime, "/")[0]
-	reader.Seek(0, 0)
-
-	dirPath := path.Join("../web/vault/", mimeRoot)
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
-		log.Fatalf("Failed to create directory: %v", err)
-	}
-
-	fileExt := path.Ext(file.Filename)
-	nextID, err := server.vault.AddItem(fileExt, mimeRoot, mime, tags)
-	if err != nil {
-		log.Fatalf("Couldn't add item: %v", err)
-	}
-	fileName := strconv.FormatInt(nextID, 10) + fileExt
-	filePath := path.Join(dirPath, fileName)
-
-	outFile, err := os.Create(filePath)
-	if err != nil {
-		log.Fatalf("Failed to create file: %v", err)
-	}
-	defer outFile.Close()
-
-	if _, err = outFile.ReadFrom(reader); err != nil {
-		log.Fatalf("Failed to save file: %v", err)
+		log.Fatalf("Failed to upload file: %v", err)
 	}
 }

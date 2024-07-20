@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gabriel-vasile/mimetype"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type DbVault struct {
-	db *sql.DB
+	dirPath string
+	db      *sql.DB
 }
 
 func NewDbVault(dirPath, dbPath string) (*DbVault, error) {
@@ -28,31 +28,24 @@ func NewDbVault(dirPath, dbPath string) (*DbVault, error) {
 		return nil, err
 	}
 
-	return &DbVault{db}, nil
+	return &DbVault{dirPath, db}, nil
 }
 
-func (v *DbVault) UploadItem(filename string, tags []string, reader io.ReadSeeker) (err error) {
-	mimeType, err := mimetype.DetectFile(filename)
-	// mimeType, err := mimetype.DetectReader(reader)
-	if err != nil {
-		return
-	}
-	mime := mimeType.String()
+func (v *DbVault) UploadItem(extension string, mime string, tags []string, reader io.ReadSeeker) (err error) {
 	mimeRoot := strings.Split(mime, "/")[0]
 	reader.Seek(0, 0)
 
-	dirPath := path.Join("../web/vault/", mimeRoot)
+	dirPath := path.Join(v.dirPath, mimeRoot)
 	if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
 		return
 	}
 
 	jtags, _ := json.Marshal(tags)
-	fileExt := path.Ext(filename)
-	nextID, err := v.addItem(fileExt, mimeRoot, mime, jtags)
+	nextID, err := v.addItem(extension, mimeRoot, mime, jtags)
 	if err != nil {
 		return
 	}
-	fileName := strconv.FormatInt(nextID, 10) + fileExt
+	fileName := strconv.FormatInt(nextID, 10) + extension
 	filePath := path.Join(dirPath, fileName)
 
 	outFile, err := os.Create(filePath)

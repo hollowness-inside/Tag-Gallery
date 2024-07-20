@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/neox5/go-formdata"
 )
@@ -72,7 +73,14 @@ func (server *Server) uploadItem(w http.ResponseWriter, r *http.Request) {
 	}
 	defer reader.Close()
 
-	err = server.vault.UploadItem(file.Filename, tags, reader)
+	mime, err := readerToMimetype(reader)
+	if err != nil {
+		log.Fatalf("Couldn't determine mimetype: %v", err)
+	}
+
+	ext := filepath.Ext(file.Filename)
+
+	err = server.vault.UploadItem(ext, mime, tags, reader)
 	if err != nil {
 		log.Fatalf("Failed to upload file: %v", err)
 	}

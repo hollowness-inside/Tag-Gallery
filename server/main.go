@@ -3,13 +3,13 @@ package main
 import "log"
 
 func main() {
-	dbVault, err := NewPlainVault("../vault/", "../vault/vault.db")
+	vault, err := NewPlainVault("../vault/", "../vault/vault.db")
 	if err != nil {
 		log.Fatal("Cannot create DbVault: ", err)
 	}
-	defer dbVault.Close()
+	defer vault.Close()
 
-	server := NewServer("../web", dbVault)
+	server := NewServer("../web", vault)
 
 	server.serve(":8080")
 }

@@ -69,7 +69,8 @@ export class JsonTagFS {
 
     #addImage(it) {
         let element = new Image();
-        element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+        element.src = "/thumb/" + it["id"];
+        element.addEventListener("click", () => window.open("/vault/" + it["id"]))
 
         let item = new Item(it["path"], it["tags"], element);
         this.items.push(item);
@@ -78,7 +79,9 @@ export class JsonTagFS {
 
     #addVideo(it) {
         let element = document.createElement("video");
-        element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+        element.src = "/thumb/" + it["id"];
+        element.addEventListener("click", () => window.open("/vault/" + it["id"]))
+
 
         let item = new Item(it["path"], it["tags"], element);
         this.items.push(item);

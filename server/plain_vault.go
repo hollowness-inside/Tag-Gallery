@@ -31,6 +31,46 @@ func NewPlainVault(dirPath, dbPath string) (*PlainVault, error) {
 	return &PlainVault{dirPath, db}, nil
 }
 
+func (vault *PlainVault) GetItem(id int) ([]byte, string, error) {
+	var ext, mimetype, directory string
+
+	req := vault.db.QueryRow("SELECT extension, type, directory FROM vault WHERE id = ?", id)
+	err := req.Scan(&ext, &mimetype, &directory)
+	if err != nil {
+		return nil, "", err
+	}
+
+	idStr := strconv.Itoa(id)
+
+	fpath := path.Join(vault.dirPath, directory, idStr+ext)
+	bytes, err := os.ReadFile(fpath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return bytes, mimetype, nil
+}
+
+func (vault *PlainVault) GetThumbnail(id int) ([]byte, string, error) {
+	var ext, mimetype, directory string
+
+	req := vault.db.QueryRow("SELECT extension, type, directory FROM vault WHERE id = ?", id)
+	err := req.Scan(&ext, &mimetype, &directory)
+	if err != nil {
+		return nil, "", err
+	}
+
+	idStr := strconv.Itoa(id)
+
+	fpath := path.Join(vault.dirPath, directory, idStr+ext)
+	bytes, err := os.ReadFile(fpath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return bytes, mimetype, nil
+}
+
 func (vault *PlainVault) UploadItem(extension string, mime string, tags []string, reader io.ReadSeeker) (err error) {
 	mimeRoot := strings.Split(mime, "/")[0]
 	reader.Seek(0, 0)

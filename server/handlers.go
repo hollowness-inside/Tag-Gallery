@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/neox5/go-formdata"
 )
@@ -24,6 +26,8 @@ func (server *Server) serve(addr string) error {
 	http.Handle("/", static)
 	http.HandleFunc("/fetch", server.fetchItems)
 	http.HandleFunc("/upload", server.uploadItem)
+	http.HandleFunc("/vault/*", server.accessVault)
+	http.HandleFunc("/thumb/*", server.accessThumb)
 
 	log.Println("Server is starting at ", addr)
 	return http.ListenAndServe(addr, nil)
@@ -84,4 +88,52 @@ func (server *Server) uploadItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("Failed to upload file: %v", err)
 	}
+}
+
+func (server *Server) accessVault(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	path := strings.Split(r.URL.String(), "/")
+	idStr := path[len(path)-1]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Wrong id", http.StatusBadRequest)
+		return
+	}
+
+	content, contentType, err := server.vault.GetItem(id)
+	if err != nil {
+		log.Fatalf("%v", err)
+		return
+	}
+
+	w.Header().Set("content-type", contentType)
+	w.Write(content)
+}
+
+func (server *Server) accessThumb(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	path := strings.Split(r.URL.String(), "/")
+	idStr := path[len(path)-1]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Wrong id", http.StatusBadRequest)
+		return
+	}
+
+	content, contentType, err := server.vault.GetThumbnail(id)
+	if err != nil {
+		log.Fatalf("%v", err)
+		return
+	}
+
+	w.Header().Set("content-type", contentType)
+	w.Write(content)
 }

@@ -39,8 +39,8 @@ export class JsonTagFS {
     update(data) {
         for (let item of data) {
             let tags = item["tags"];
-            this.addTags(tags);
-            this.addItem(item);
+            this.#addTags(tags);
+            this.#addItem(item);
         }
     }
 
@@ -52,29 +52,40 @@ export class JsonTagFS {
         return this.#tags;
     }
 
-    addItem(it) {
+    #addItem(it) {
         let type = it["type"].split("/")[0];
 
-        if (type == "image") {
-            let element = new Image();
-            element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+        switch (type) {
+            case "image":
+                return this.#addImage(it);
 
-            let item = new Item(it["path"], it["tags"], element);
-            this.items.push(item);
-            return it;
-        } else if (type == "video") {
-            let element = document.createElement("video");
-            element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+            case "video":
+                return this.#addVideo(it);
 
-            let item = new Item(it["path"], it["tags"], element);
-            this.items.push(item);
-            return it;
-        } else {
-            alert("Unknown file format: " + it["type"]);
+            default:
+                alert("Unknown file format: " + it["type"]);
         }
     }
 
-    addTags(tags) {
+    #addImage(it) {
+        let element = new Image();
+        element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+
+        let item = new Item(it["path"], it["tags"], element);
+        this.items.push(item);
+        return it;
+    }
+
+    #addVideo(it) {
+        let element = document.createElement("video");
+        element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+
+        let item = new Item(it["path"], it["tags"], element);
+        this.items.push(item);
+        return it;
+    }
+
+    #addTags(tags) {
         for (let tag of tags)
             if (!this.#tags.includes(tag))
                 this.#tags.push(tag);
@@ -82,27 +93,39 @@ export class JsonTagFS {
 
     /**
      * Filters files based on the provided tags.
-     * @param {string[]} filters - The tags to filter by.
+     * @param {string[]} activeTags - The tags to filter by.
      * @returns {[Item[], Item[], {}]} An array of files that match the filter criteria.
      */
-    filter(filters) {
-        if (filters.length === 0)
-            return this.items;
+    filter(activeTags) {
+        if (activeTags.length === 0) {
+            let tagCounts = {};
+
+            this.items.forEach(file => 
+                file.tags.forEach(tag => 
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1
+                )
+            );
+
+            return [this.items, [], tagCounts];
+        }
 
         let tagCounts = {};
         let filteredFiles = [];
         let droppedFiles = [];
 
         this.items.forEach(file => {
-            let cond = filters.every(tag => file.tags.includes(tag));
+            let cond = activeTags.every(tag => file.tags.includes(tag));
 
-            if (cond)
+            if (cond) {
+                console.log('File', file);
                 filteredFiles.push(file);
-            else
+                file.tags.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
+            } else {
                 droppedFiles.push(file);
+            }
         });
 
-        filteredFiles.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
+        // filteredFiles.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
 
         return [filteredFiles, droppedFiles, tagCounts];
     }

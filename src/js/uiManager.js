@@ -100,8 +100,8 @@ export class UIManager {
         const activeFilters = this.#getCheckedTags();
         let [filteredFiles, droppedFiles, tag_counts] = this.#tagfs.filter(activeFilters);
 
-        droppedFiles.forEach(file => file.element.style.display = "none");
         filteredFiles.forEach(file => file.element.style.display = "block");
+        droppedFiles.forEach(file => file.element.style.display = "none");
 
         for (let [tag, count] of Object.entries(tag_counts)) {
             let label = document.getElementById("label_" + tag);

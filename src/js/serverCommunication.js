@@ -1,3 +1,4 @@
+import { JsonTagFS } from './jfs.js';
 import { UIManager } from './uiManager.js';
 
 /**
@@ -19,7 +20,7 @@ export class ServerCommunication {
 
     /**
      * Requests the backend server to retreive the list of items in the vault.
-     * @param {TagFS} tagfs
+     * @param {JsonTagFS} tagfs
      * @param {UIManager} ui 
      */
     static fetchItems(tagfs, ui) {
@@ -29,7 +30,7 @@ export class ServerCommunication {
                 ui.clear();
 
                 tagfs.update(data);
-                tagfs.files.forEach(file =>
+                tagfs.items.forEach(file =>
                     ui.addElement(file.element)
                 );
 

@@ -98,34 +98,22 @@ export class UIManager {
 
     updateViewport() {
         const activeFilters = this.#getCheckedTags();
-        let filteredFiles = this.#tagfs.filter(activeFilters);
+        let [filteredFiles, droppedFiles, tag_counts] = this.#tagfs.filter(activeFilters);
 
-        let tag_counts = {};
-        this.#tagfs.tags.forEach(tag => tag_counts[tag] = 0);
-
-        this.#tagfs.files.forEach(file => {
-            if (filteredFiles.includes(file)) {
-                file.element.style.display = "block";
-                file.tags.forEach(tag => {
-                    tag_counts[tag] += 1;
-                });
-            } else {
-                file.element.style.display = "none";
-            }
-        });
+        droppedFiles.forEach(file => file.element.style.display = "none");
+        filteredFiles.forEach(file => file.element.style.display = "block");
 
         for (let [tag, count] of Object.entries(tag_counts)) {
             let label = document.getElementById("label_" + tag);
 
             if (count === 0) {
                 label.parentElement.style.display = "none";
-                continue;
             } else {
                 label.parentElement.style.display = "block";
-            }
 
-            let i = label.innerText.search(/\(\d+\)$/);
-            label.innerText = label.innerText.substring(0, i) + " (" + count + ")";
+                let i = label.innerText.search(/\(\d+\)$/);
+                label.innerText = label.innerText.substring(0, i) + " (" + count + ")";
+            }
         }
     }
 

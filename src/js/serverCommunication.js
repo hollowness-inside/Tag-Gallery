@@ -34,8 +34,10 @@ export class ServerCommunication {
                     ui.addElement(file.element)
                 );
 
-                tagfs.tags.forEach(tag => ui.addTag(tag));
+                tagfs.tags.forEach(tag => ui.createTag(tag));
+
             })
+            .then(() => ui.updateViewport())
             .catch(error => {
                 console.error("Error fetching the JSON file:", error);
             });

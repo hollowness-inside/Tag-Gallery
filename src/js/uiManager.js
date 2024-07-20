@@ -49,7 +49,7 @@ export class UIManager {
      * Creates a new element for the tag and inserts it into the list.
      * @param {string} tag tag to be added
      */
-    #addTag(tag) {
+    createTag(tag) {
         let checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.name = tag;
@@ -77,7 +77,8 @@ export class UIManager {
         if (this.#tagfs.hasTag(tag))
             return;
 
-        this.#addTag(tag);
+        this.#tagfs.addTag(tag);
+        this.createTag(tag);
     }
 
     /**

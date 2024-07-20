@@ -91,6 +91,10 @@ export class JsonTagFS {
                 this.#tags.push(tag);
     }
 
+    addTag(tag) {
+        this.#tags.push(tag);
+    }
+
     /**
      * Checks if the given tag exists.
      * @param {string} tag tag to be checked for existence.

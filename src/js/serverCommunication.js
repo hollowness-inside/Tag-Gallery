@@ -1,5 +1,5 @@
-import { JsonTagFS } from './jfs.js';
-import { UIManager } from './uiManager.js';
+import { JsonTagFS } from "./jfs.js";
+import { UIManager } from "./uiManager.js";
 
 /**
  * Wrapper for the backend server API.

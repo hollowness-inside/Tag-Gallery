@@ -1,5 +1,5 @@
-import { UIManager } from './uiManager.js';
-import { ServerCommunication } from './serverCommunication.js';
+import { UIManager } from "./uiManager.js";
+import { ServerCommunication } from "./serverCommunication.js";
 
 /**
  * Wrapper for controlling the modal window.
@@ -120,7 +120,7 @@ export class ModalWindow {
     }
 
     /**
-     * Action on clicking the 'upload' button. All newly introduced tags get added
+     * Action on clicking the "upload" button. All newly introduced tags get added
      * to the global tag list.
      */
     upload() {

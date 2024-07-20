@@ -53,8 +53,8 @@ export class JsonTagFS {
     }
 
     addItem(it) {
-        let type = it['type'].split('/')[0];
-        
+        let type = it["type"].split("/")[0];
+
         if (type == "image") {
             let element = new Image();
             element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
@@ -63,14 +63,14 @@ export class JsonTagFS {
             this.items.push(item);
             return it;
         } else if (type == "video") {
-            let element = document.createElement('video');
+            let element = document.createElement("video");
             element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
 
             let item = new Item(it["path"], it["tags"], element);
             this.items.push(item);
             return it;
         } else {
-            alert('Unknown file format: ' + it['type']);
+            alert("Unknown file format: " + it["type"]);
         }
     }
 

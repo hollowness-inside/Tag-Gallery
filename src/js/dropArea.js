@@ -1,7 +1,7 @@
-import { UIManager } from './uiManager.js';
-import { ModalWindow } from './modalWindow.js';
-import { ServerCommunication } from './serverCommunication.js';
-import { addEventListeners, fileToElement } from './utils.js'
+import { UIManager } from "./uiManager.js";
+import { ModalWindow } from "./modalWindow.js";
+import { ServerCommunication } from "./serverCommunication.js";
+import { addEventListeners, fileToElement } from "./utils.js"
 
 /**
  * Wrapper for the uploader, drop area.

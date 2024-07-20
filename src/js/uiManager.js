@@ -1,4 +1,4 @@
-import { JsonTagFS } from './jfs.js';
+import { JsonTagFS } from "./jfs.js";
 
 /**
  * Controls the viewport and the tag list.

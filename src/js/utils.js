@@ -15,8 +15,8 @@ export function fileToElement(file) {
         fr.readAsDataURL(file);
 
         return element;
-    } else if (fileType == 'video') {
-        let element = document.createElement('video');
+    } else if (fileType == "video") {
+        let element = document.createElement("video");
 
         var fr = new FileReader();
         fr.onload = () => {
@@ -26,7 +26,7 @@ export function fileToElement(file) {
 
         return element;
     } else {
-        alert('Uknown file format: ' + fileType);
+        alert("Uknown file format: " + fileType);
     }
 }
 

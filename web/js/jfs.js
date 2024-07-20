@@ -137,8 +137,6 @@ export class JsonTagFS {
             }
         });
 
-        // filteredFiles.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
-
         return [filteredFiles, droppedFiles, tagCounts];
     }
 }

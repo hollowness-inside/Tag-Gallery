@@ -109,10 +109,7 @@ class UIManager {
     }
 
     updateViewport() {
-        let checkboxes = this.#taglist.getElementsByTagName("input");
-        checkboxes = Array.from(checkboxes);
-
-        const activeFilters = checkboxes.filter(ch => ch.checked).map(ch => ch.name);
+        const activeFilters = this.#getCheckedTags();
         let filteredFiles = this.#tagfs.filter(activeFilters);
 
         let tag_counts = {};
@@ -142,6 +139,13 @@ class UIManager {
             let i = label.innerText.search(/\(\d+\)$/);
             label.innerText = label.innerText.substring(0, i) + " (" + count + ")";
         }
+    }
+
+    #getCheckedTags() {
+        let checkboxes = this.#taglist.getElementsByTagName("input");
+        checkboxes = Array.from(checkboxes);
+
+        return checkboxes.filter(ch => ch.checked).map(ch => ch.name);
     }
 
     /**

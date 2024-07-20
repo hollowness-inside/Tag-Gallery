@@ -13,39 +13,34 @@ import (
 	"github.com/neox5/go-formdata"
 )
 
+type Server struct {
+	static string
+	vault  Vault
+}
+
+func NewServer(static string, vault Vault) Server {
+	return Server{static, vault}
+}
+
+func (server *Server) serve(addr string) error {
+	static := http.FileServer(http.Dir(server.static))
+
+	http.Handle("/", static)
+	http.HandleFunc("/fetch", server.fetchItems)
+	http.HandleFunc("/upload", server.uploadItem)
+
+	log.Println("Server is starting at ", addr)
+	return http.ListenAndServe(addr, nil)
+}
+
 // Fetch items from the vault table and return them as JSON
-func fetchItems(w http.ResponseWriter, r *http.Request) {
+func (server *Server) fetchItems(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var count int
-	if err := db.QueryRow("SELECT COUNT(*) FROM vault").Scan(&count); err != nil {
-		log.Fatalf("Failed to count items: %v", err)
-	}
-
-	items := make([]Item, 0, count)
-	rows, err := db.Query("SELECT id, extension, directory, type, tags FROM vault")
-	if err != nil {
-		log.Fatalf("Failed to fetch items: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var item Item
-		var tagsJSON string
-		if err := rows.Scan(&item.Id, &item.Ext, &item.Dir, &item.Mimetype, &tagsJSON); err != nil {
-			log.Fatalf("Failed to scan item: %v", err)
-		}
-
-		if err := json.Unmarshal([]byte(tagsJSON), &item.Tags); err != nil {
-			log.Fatalf("Failed to unmarshal tags: %v", err)
-		}
-
-		items = append(items, item)
-	}
-
+	items, _ := server.vault.GetItems()
 	responseJSON, err := json.Marshal(items)
 	if err != nil {
 		log.Fatalf("Failed to marshal items to JSON: %v", err)
@@ -56,7 +51,7 @@ func fetchItems(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handle file upload and save the file metadata to the database
-func uploadItem(w http.ResponseWriter, r *http.Request) {
+func (server *Server) uploadItem(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -94,7 +89,10 @@ func uploadItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fileExt := path.Ext(file.Filename)
-	nextID := addItem(fileExt, mimeRoot, mime, tags)
+	nextID, err := server.vault.AddItem(fileExt, mimeRoot, mime, tags)
+	if err != nil {
+		log.Fatalf("Couldn't add item: %v", err)
+	}
 	fileName := strconv.FormatInt(nextID, 10) + fileExt
 	filePath := path.Join(dirPath, fileName)
 

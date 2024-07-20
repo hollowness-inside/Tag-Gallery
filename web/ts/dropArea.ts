@@ -57,7 +57,7 @@ export class DropArea {
     #onDrop(e: DragEvent) {
         // TODO: Check if not null
         let dt = e.dataTransfer!;
-        let files = dt.files;
+        let files = Array.from(dt.files);
 
         if (files.length > 1) {
             for (let file of files) {

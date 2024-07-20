@@ -17,7 +17,7 @@ export class UIManager {
         this.#clearBtn = document.getElementById("clear")! as HTMLButtonElement;
 
         this.#clearBtn.addEventListener("click", () => {
-            let tags = this.#taglist.getElementsByTagName("input");
+            let tags = Array.from(this.#taglist.getElementsByTagName("input"));
 
             for (let element of tags)
                 element.checked = false;

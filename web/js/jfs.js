@@ -126,16 +126,19 @@ export class JsonTagFS {
         let filteredFiles = [];
         let droppedFiles = [];
 
+        this.#tags.forEach(tag => tagCounts[tag] = 0);
+
         this.items.forEach(file => {
             let cond = activeTags.every(tag => file.tags.includes(tag));
 
             if (cond) {
                 filteredFiles.push(file);
-                file.tags.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
+                file.tags.forEach(tag => tagCounts[tag] += 1);
             } else {
                 droppedFiles.push(file);
             }
         });
+
 
         return [filteredFiles, droppedFiles, tagCounts];
     }

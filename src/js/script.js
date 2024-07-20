@@ -8,7 +8,7 @@ class App {
         const ui = new UIManager(tagfs);
         const mw = new ModalWindow(ui);
         new DropArea(ui, mw);
-        
+
         ServerCommunication.fetchItems(tagfs, ui);
     }
 }
@@ -178,11 +178,11 @@ class ServerCommunication {
      * @param {string[]} tags tags corresponding to the file.
      */
     static uploadItem(file, tags = ["no tags"]) {
-        let fd = new FormData();
-        fd.append("file", file);
-        fd.append("tags", JSON.stringify(tags));
+        let body = new FormData();
+        body.append("file", file);
+        body.append("tags", JSON.stringify(tags));
 
-        fetch("/upload", { method: "POST", body: fd });
+        fetch("/upload", { method: "POST", body: body });
     }
 
     /**
@@ -317,6 +317,7 @@ class ModalWindow {
         let fileType = file.type.split("/")[0];
         if (fileType == "image") {
             this.#element = fileToElement(file);
+            this.#element.data = file;
 
             this.#view.textContent = "";
             this.#view.appendChild(this.#element);
@@ -475,6 +476,16 @@ function fileToElement(file) {
         let element = new Image();
         var fr = new FileReader();
 
+        fr.onload = () => {
+            element.src = fr.result;
+        }
+        fr.readAsDataURL(file);
+
+        return element;
+    } else if (fileType == 'video') {
+        let element = document.createElement('video');
+        
+        var fr = new FileReader();
         fr.onload = () => {
             element.src = fr.result;
         }

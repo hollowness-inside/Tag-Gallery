@@ -74,7 +74,7 @@ button {
     overflow: auto;
 }
 
-#viewport img {
+#viewport * {
     margin: 6px;
     border-radius: 5px;
     object-fit: cover;

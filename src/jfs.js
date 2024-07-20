@@ -29,12 +29,21 @@ export class JsonTagFS extends TagFS {
     }
 
     addItem(it) {
-        let element = new Image();
-        element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+        if (it['type'] == "image") {
+            let element = new Image();
+            element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
 
-        let item = new Item(it["path"], it["tags"], element);
-        this.#files.push(item);
-        return it;
+            let item = new Item(it["path"], it["tags"], element);
+            this.#files.push(item);
+            return it;
+        } else if (it['type'] == "video") {
+            let element = document.createElement('video');
+            element.src = "/vault/" + it["directory"] + "/" + it["id"] + it["extension"];
+
+            let item = new Item(it["path"], it["tags"], element);
+            this.#files.push(item);
+            return it;
+        }
     }
 
     addTags(tags) {

@@ -1,5 +1,6 @@
 import { UIManager } from "./uiManager.js";
 import { ServerCommunication } from "./serverCommunication.js";
+import { fileToElement } from "./utils.js"
 
 /**
  * Wrapper for controlling the modal window.

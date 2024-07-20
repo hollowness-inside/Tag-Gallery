@@ -130,7 +130,6 @@ export class JsonTagFS {
             let cond = activeTags.every(tag => file.tags.includes(tag));
 
             if (cond) {
-                console.log('File', file);
                 filteredFiles.push(file);
                 file.tags.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
             } else {

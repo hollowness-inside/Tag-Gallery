@@ -1,6 +1,5 @@
-import { JsonTagFS } from "../jfs.js";
+import { JsonTagFS } from "./jfs.js";
 import { Item } from "./item.js";
-import { TagFS } from "./tagfs.js";
 
 class App {
     constructor() {
@@ -39,12 +38,12 @@ class UIManager {
     #tags;
 
     /**
-     * @type {TagFS}
+     * @type {JsonTagFS}
      */
     #tagfs;
 
     /**
-     * @param {TagFS} tagfs
+     * @param {JsonTagFS} tagfs
      */
     constructor(tagfs) {
         this.#tags = [];
@@ -484,7 +483,7 @@ function fileToElement(file) {
         return element;
     } else if (fileType == 'video') {
         let element = document.createElement('video');
-        
+
         var fr = new FileReader();
         fr.onload = () => {
             element.src = fr.result;

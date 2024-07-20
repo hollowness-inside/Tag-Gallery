@@ -1,13 +1,10 @@
-import { TagFS } from "./js/tagfs.js";
-import { Item } from "./js/item.js";
+import { Item } from "./item.js";
 
-export class JsonTagFS extends TagFS {
+export class JsonTagFS {
     #files;
     #tags;
 
     constructor() {
-        super();
-
         this.#files = [];
         this.#tags = [];
     }
@@ -50,5 +47,19 @@ export class JsonTagFS extends TagFS {
         for (let tag of tags)
             if (!this.#tags.includes(tag))
                 this.#tags.push(tag);
+    }
+
+    /**
+     * Filters files based on the provided tags.
+     * @param {string[]} filters - The tags to filter by.
+     * @returns {Item[]} An array of files that match the filter criteria.
+     */
+    filter(filters) {
+        if (filters.length === 0)
+            return this.files;
+
+        return this.files.filter(file =>
+            filters.every(tag => file.tags.includes(tag))
+        );
     }
 }

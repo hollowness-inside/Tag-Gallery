@@ -30,7 +30,7 @@ export class DropArea {
         addEventListeners(this.#dropArea, ["drop"], (e: DragEvent) => this.#onDrop(e));
     }
 
-    #preventDefaults(e: { preventDefault: () => void; stopPropagation: () => void; }) {
+    #preventDefaults(e: Event) {
         e.preventDefault();
         e.stopPropagation();
     }
@@ -55,15 +55,17 @@ export class DropArea {
      * show up to enter tags for the given file.
      */
     #onDrop(e: DragEvent) {
-        // TODO: Check if not null
-        let dt = e.dataTransfer!;
+        let dt = e.dataTransfer;
+        if (!dt) {
+            return;
+        }
+
         let files = Array.from(dt.files);
 
         if (files.length > 1) {
             for (let file of files) {
                 ServerCommunication.uploadItem(file);
 
-                // TODO: Check if not null
                 let el = fileToElement(file)!;
                 this.#ui.addElement(el);
             }
@@ -79,7 +81,11 @@ export class DropArea {
      * Action on selecting an item by clicking the upload button.
      */
     #onSelect(e: Event) {
-        // TODO: Check if not null
-        this.#mw.observe(this.#fileInput.files![0]);
+        let files = this.#fileInput.files;
+        if (!files) {
+            return;
+        }
+
+        this.#mw.observe(files[0]);
     }
 }

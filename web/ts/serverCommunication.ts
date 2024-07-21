@@ -10,12 +10,14 @@ export class ServerCommunication {
      * @param file file to be saved in the vault.
      * @param tags tags corresponding to the file.
      */
-    static uploadItem(file: File, tags: string[] = ["no tags"]) {
+    static uploadItem(file: File, tags: string[] = ["no tags"]): Promise<number> {
         let body = new FormData();
         body.append("file", file);
         body.append("tags", JSON.stringify(tags));
 
-        fetch("/upload", { method: "POST", body: body });
+        return fetch("/upload", { method: "POST", body: body })
+            .then(data => data.text())
+            .then(data => parseInt(data))
     }
 
     /**

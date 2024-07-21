@@ -84,10 +84,12 @@ func (server *Server) uploadItem(w http.ResponseWriter, r *http.Request) {
 
 	ext := filepath.Ext(file.Filename)
 
-	err = server.vault.UploadItem(ext, mime, tags, reader)
+	itemId, err := server.vault.UploadItem(ext, mime, tags, reader)
 	if err != nil {
 		log.Fatalf("Failed to upload file: %v", err)
 	}
+
+	w.Write([]byte(strconv.Itoa(itemId)))
 }
 
 func (server *Server) accessVault(w http.ResponseWriter, r *http.Request) {

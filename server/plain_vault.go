@@ -71,34 +71,33 @@ func (vault *PlainVault) GetThumbnail(id int) ([]byte, string, error) {
 	return bytes, mimetype, nil
 }
 
-func (vault *PlainVault) UploadItem(extension string, mime string, tags []string, reader io.ReadSeeker) (err error) {
+func (vault *PlainVault) UploadItem(extension string, mime string, tags []string, reader io.ReadSeeker) (int, error) {
 	mimeRoot := strings.Split(mime, "/")[0]
 	reader.Seek(0, 0)
 
 	dirPath := path.Join(vault.dirPath, mimeRoot)
-	if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
-		return
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return 0, nil
 	}
 
 	jtags, _ := json.Marshal(tags)
 	nextID, err := vault.addItem(extension, mimeRoot, mime, jtags)
 	if err != nil {
-		return
+		return 0, nil
 	}
 	fileName := strconv.FormatInt(nextID, 10) + extension
 	filePath := path.Join(dirPath, fileName)
 
 	outFile, err := os.Create(filePath)
 	if err != nil {
-		return
+		return 0, nil
 	}
 	defer outFile.Close()
-
 	if _, err = outFile.ReadFrom(reader); err != nil {
-		return
+		return 0, nil
 	}
 
-	return
+	return int(nextID), nil
 }
 
 func (vault *PlainVault) GetItems() ([]Item, error) {

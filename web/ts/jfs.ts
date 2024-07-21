@@ -77,8 +77,13 @@ export class JsonTagFS {
                 this.#tags.push(tag);
     }
 
-    addTag(tag: string) {
-        this.#tags.push(tag);
+    addTag(tag: string): boolean {
+        if (!this.#tags.includes(tag)) {
+            this.#tags.push(tag);
+            return true;
+        }
+
+        return false;
     }
 
     /**

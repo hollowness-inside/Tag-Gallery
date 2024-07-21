@@ -56,11 +56,8 @@ export class UIManager {
      * @param tag tag to be added
      */
     addTag(tag: string) {
-        if (this.#tagfs.hasTag(tag))
-            return;
-
-        this.#tagfs.addTag(tag);
-        this.createTag(tag);
+        if (this.#tagfs.addTag(tag))
+            this.createTag(tag);
     }
 
     /**

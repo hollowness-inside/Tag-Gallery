@@ -101,12 +101,13 @@ export class ModalWindow {
      * to the global tag list.
      */
     upload() {
-        ServerCommunication.uploadItem(this.#element!.data, this.#tags);
+        if (!this.#element)
+            return;
 
-        for (let tag of this.#tags)
-            this.#ui.addTag(tag);
+        ServerCommunication.uploadItem(this.#element.data, this.#tags);
 
-        this.#ui.addElement(this.#element!);
+        this.#ui.addTags(this.#tags);
+        this.#ui.addElement(this.#element);
         this.close();
     }
 

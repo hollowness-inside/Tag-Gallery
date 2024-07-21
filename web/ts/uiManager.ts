@@ -1,4 +1,4 @@
-import { JsonTagFS } from "./jfs.js";
+import { Item, JsonTagFS } from "./jfs.js";
 
 /**
  * Controls the viewport and the tag list.
@@ -58,6 +58,11 @@ export class UIManager {
     addTag(tag: string) {
         if (this.#tagfs.addTag(tag))
             this.createTag(tag);
+    }
+
+    addTags(tags: string[]) {
+        for (let tag of tags)
+            this.addTag(tag);
     }
 
     /**

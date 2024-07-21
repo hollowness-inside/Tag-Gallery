@@ -99,7 +99,7 @@ export class JsonTagFS {
      * @param activeTags - The tags to filter by.
      * @returns An array of files that match the filter criteria.
      */
-    filter(activeTags: string[]): [Item[], Item[], {}] {
+    filter(activeTags: string[]): { filteredFiles: Item[], droppedFiles: Item[], tagCounts: { [tag: string]: number } } {
         if (activeTags.length === 0) {
             let tagCounts: { [tag: string]: number } = {};
 
@@ -109,7 +109,7 @@ export class JsonTagFS {
                 )
             );
 
-            return [this.items, [], tagCounts];
+            return { filteredFiles: this.items, droppedFiles: [], tagCounts };
         }
 
         let tagCounts: { [tag: string]: number } = {};
@@ -117,7 +117,6 @@ export class JsonTagFS {
         let droppedFiles: Item[] = [];
 
         this.#tags.forEach(tag => tagCounts[tag] = 0);
-
         this.items.forEach(file => {
             let cond = activeTags.every(tag => file.tags.includes(tag));
 
@@ -130,6 +129,6 @@ export class JsonTagFS {
         });
 
 
-        return [filteredFiles, droppedFiles, tagCounts];
+        return {filteredFiles, droppedFiles, tagCounts};
     }
 }

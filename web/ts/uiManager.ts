@@ -75,12 +75,12 @@ export class UIManager {
 
     updateViewport() {
         const activeFilters = this.#getCheckedTags();
-        let [filteredFiles, droppedFiles, tag_counts] = this.#tagfs.filter(activeFilters);
+        let {filteredFiles, droppedFiles, tagCounts} = this.#tagfs.filter(activeFilters);
 
         filteredFiles.forEach(file => file.element.style.display = "block");
         droppedFiles.forEach(file => file.element.style.display = "none");
 
-        for (let [tag, count] of Object.entries(tag_counts)) {
+        for (let [tag, count] of Object.entries(tagCounts)) {
             let label = document.getElementById("label_" + tag)!;
             let parent = label.parentElement!;
 

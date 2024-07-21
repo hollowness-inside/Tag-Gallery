@@ -27,13 +27,6 @@ export function fileToElement(file: File): HTMLElement | null {
     return null;
 }
 
-
-/**
- * 
- * @param {HTMLElement} listener
- * @param {string} events
- * @param {Function} action 
- */
 export function addEventListeners(listener: HTMLElement, events: string[], action: any) {
     events.forEach(ev => {
         listener.addEventListener(ev, action, false);

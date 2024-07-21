@@ -14,7 +14,7 @@ export class ModalWindow {
     #body: HTMLDivElement;
     #view: HTMLDivElement;
     #tagList: HTMLDivElement;
-    #tagInput: HTMLDivElement;
+    #tagInput: HTMLInputElement;
     #closeBtn: HTMLButtonElement;
     #uploadBtn: HTMLButtonElement;
 
@@ -115,7 +115,7 @@ export class ModalWindow {
      * and adds it to the tag list.
      */
     #enterTag() {
-        let tag = this.#tagInput.getAttribute("value")!;
+        let tag = this.#tagInput.value;
 
         let elem = document.createElement("span");
         elem.className = "tag";
@@ -123,6 +123,6 @@ export class ModalWindow {
 
         this.#tags.push(tag);
         this.#tagList.appendChild(elem);
-        this.#tagInput.setAttribute("value", "");
+        this.#tagInput.value = "";
     }
 }

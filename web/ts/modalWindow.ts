@@ -85,9 +85,7 @@ export class ModalWindow {
 
         let fileType = file.type.split("/")[0];
         if (fileType == "image") {
-            // TODO: Check if not null
             this.#element = fileToElement(file)! as ElementWithData;
-            // this.#element.setAttribute("data", file);
             this.#element.data = file;
 
             this.#view.textContent = "";
